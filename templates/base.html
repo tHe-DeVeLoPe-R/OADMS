@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>{% block title %}Urwat il Wusqa Travels - Operations DMS{% endblock %}</title>
+    <!-- Google Fonts & FontAwesome 6 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Chart.js for Stakeholders Analytics -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Custom Claymorphism Stylesheet -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/claymorphism.css') }}">
+    {% block head %}{% endblock %}
+</head>
+<body>
+
+    <!-- Professional App Top Bar -->
+    <header class="app-header">
+        <div class="brand-wrapper">
+            <div class="brand-badge" style="background: #ffffff; padding: 4px; border: 1.5px solid #a7f3d0; box-shadow: 0 4px 12px rgba(6, 78, 59, 0.12); display: flex; align-items: center; justify-content: center; overflow: hidden;">
+                <img src="{{ url_for('static', filename='images/logoutw.png') }}" alt="Urwat il Wusqa Logo" style="width: 36px; height: 36px; object-fit: contain;">
+            </div>
+            <div>
+                <div class="brand-title">Urwat il Wusqa Travels</div>
+                <div class="brand-sub"><i class="fa-solid fa-gauge" style="color: var(--primary);"></i> Operations Management System</div>
+            </div>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 0.75rem;">
+            {% if session.get('user') %}
+                <span style="font-size: 0.85rem; font-weight: 700; color: var(--text-secondary); display: none; @media(min-width:600px){display:inline;}">
+                    <i class="fa-solid fa-user-shield" style="color: var(--primary);"></i> {{ session.get('user').full_name }}
+                </span>
+                
+                <a href="{{ url_for('logout') }}" class="clay-btn clay-btn-sm" title="Log Out" style="color: #64748b;">
+                    <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                    <span>Logout</span>
+                </a>
+            {% else %}
+                <a href="{{ url_for('login') }}" class="clay-btn clay-btn-primary clay-btn-sm">
+                    <i class="fa-solid fa-lock"></i> Admin Login
+                </a>
+            {% endif %}
+        </div>
+    </header>
+
+    <!-- Main Workspace Container -->
+    <main style="max-width: 1260px; width: 100%; margin: 0 auto; padding: 1.5rem 1rem;">
+        
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div style="margin-bottom: 1.25rem;">
+                    {% for category, message in messages %}
+                        <div class="clay-card-flat" style="margin-bottom: 0.65rem; background: {% if category == 'danger' %}#fee2e2; color: #991b1b; border-color: #fecaca;{% elif category == 'success' %}#d1fae5; color: #065f46; border-color: #a7f3d0;{% elif category == 'warning' %}#fff7ed; color: #c2410c; border-color: #ffedd5;{% else %}#e0f2fe; color: #0369a1; border-color: #bae6fd;{% endif %}; font-weight: 700; display: flex; align-items: center; gap: 0.75rem; border-radius: 14px;">
+                            <i class="fa-solid {% if category == 'danger' %}fa-triangle-exclamation{% elif category == 'success' %}fa-circle-check{% elif category == 'warning' %}fa-bell{% else %}fa-circle-info{% endif %}" style="font-size: 1.2rem;"></i>
+                            <span>{{ message }}</span>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

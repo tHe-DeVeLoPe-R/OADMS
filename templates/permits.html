@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block title %}Riaz Ul Jannah Permits - Urwat il Wusqa DMS{% endblock %}
+
+{% block content %}
+<div class="clay-card" style="margin-bottom: 1.75rem;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 0.75rem;">
+        <div style="display: flex; align-items: center; gap: 0.65rem;">
+            <div class="clay-icon-bubble gold" style="width: 44px; height: 44px; font-size: 1.25rem;">
+                <i class="fa-solid fa-kaaba"></i>
+            </div>
+            <div>
+                <h1 style="font-size: 1.45rem; font-weight: 800; color: #064e3b;">
+                    Riaz Ul Jannah Permit Roster
+                </h1>
+                <p style="font-size: 0.82rem; color: var(--text-muted); font-weight: 500;">
+                    Passport, Visa, Pilgrim WhatsApp, Date, Time, Status, and Permit Type.
+                </p>
+            </div>
+        </div>
+
+        <a href="{{ url_for('dashboard') }}" class="clay-btn clay-btn-sm clay-btn-secondary">
+            <i class="fa-solid fa-arrow-left"></i> Return to Dashboard
+        </a>
+    </div>
+
+    {% if permits %}
+        <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+            {% for p in permits %}
+            <div class="compact-card" style="border-left: 5px solid {% if p.status == 'Completed' %}#059669{% elif p.status == 'Upcoming' %}#d97706{% else %}#dc2626{% endif %};">
+                <div style="display: flex; align-items: center; gap: 0.75rem; flex: 1; min-width: 240px;">
+                    <div>
+                        <span class="passport-badge">
+                            <i class="fa-solid fa-passport" style="color: var(--primary); margin-right: 4px;"></i>{{ p.passport_number }}
+                        </span>
+                        <span class="clay-inset" style="padding: 2px 7px; font-size: 0.76rem; font-weight: 700; margin-left: 6px;">
+                            <i class="fa-solid fa-stamp" style="color: var(--accent-sky); margin-right: 3px;"></i>Visa: {{ p.visa_number }}
+                        </span>
+                        <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">
+                            <i class="fa-solid fa-calendar-day" style="color: var(--primary);"></i> <strong>{{ p.permit_date }}</strong> at <strong>{{ p.slot_time }}</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="display: flex; align-items: center; gap: 0.65rem; flex-wrap: wrap;">
+                    <span class="status-chip" style="{% if p.permit_type == 'Managed on Wheel Chair' %}background: #f3e8ff; color: #7e22ce; border: 1px solid #e9d5ff;{% elif p.permit_type == 'Managed by Cash' %}background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0;{% else %}background: #f1f5fa; color: #334155; border: 1px solid #cbd5e1;{% endif %}">
+                        {{ p.permit_type }}
+                    </span>
+
+                    <span class="status-chip" style="{% if p.status == 'Completed' %}background: #d1fae5; color: #065f46;{% elif p.status == 'Upcoming' %}background: #fef3c7; color: #92400e;{% else %}background: #fee2e2; color: #991b1b;{% endif %}">
+                        {{ p.status }}
+                    </span>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div style="padding: 2.5rem 1rem; text-align: center; color: var(--text-muted); font-size: 0.9rem;">
+            No Riaz Ul Jannah permits entered yet.
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

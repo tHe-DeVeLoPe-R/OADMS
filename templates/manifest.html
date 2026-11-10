@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Riaz Ul Jannah Gate Manifest - Urwat il Wusqa Travels</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        @media print {
+            .no-print { display: none !important; }
+            body { background: white !important; padding: 0 !important; }
+            .manifest-page { box-shadow: none !important; border: none !important; padding: 0 !important; }
+            table { font-size: 11pt !important; }
+        }
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: #f1f5f9;
+            color: #0f172a;
+            margin: 0;
+            padding: 20px;
+        }
+        .manifest-page {
+            max-width: 900px;
+            margin: 0 auto;
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            border: 1px solid #e2e8f0;
+        }
+        .header-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 22px;
+            font-weight: 800;
+            color: #064e3b;
+            margin: 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th {
+            background: #f8fafc;
+            border: 1.5px solid #cbd5e1;
+            padding: 10px 12px;
+            text-align: left;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #475569;
+        }
+        td {
+            border: 1px solid #e2e8f0;
+            padding: 10px 12px;
+            font-size: 13px;
+        }
+        .passport-mono {
+            font-family: monospace;
+            font-weight: 700;
+            font-size: 14px;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+        .status-confirmed { background: #d1fae5; color: #065f46; }
+        .status-pending { background: #fef3c7; color: #92400e; }
+        .status-missing { background: #fee2e2; color: #991b1b; }
+        .btn-print {
+            background: #059669;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            border: none;
+            font-weight: 700;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="manifest-page">
+        <!-- Top Toolbar -->
+        <div class="no-print" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; padding-bottom: 15px; border-bottom: 1px solid #e2e8f0;">
+            <a href="{{ url_for('permits') }}" style="color: #64748b; text-decoration: none; font-weight: 600;">
+                <i class="fa-solid fa-arrow-left"></i> Back to Dashboard
+            </a>
+            <button onclick="window.print()" class="btn-print">
+                <i class="fa-solid fa-print"></i> Print Official Gate Manifest
+            </button>
+        </div>
+
+        <!-- Official Header -->
+        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+            <div>
+                <h1 class="header-title">URWAT IL WUSQA TRAVELS & TOURS</h1>
+                <div style="font-size: 14px; font-weight: 700; color: #059669; margin-top: 4px;">
+                    <i class="fa-solid fa-kaaba"></i> RIAZ UL JANNAH (RAWDAH) OFFICIAL ENTRY MANIFEST
+                </div>
+                <div style="font-size: 12px; color: #64748b; margin-top: 2px;">
+                    Madinah Munawwarah Operations &bull; Masjid an-Nabawi Security Verification
+                </div>
+            </div>
+            <div style="text-align: right; font-size: 12px; color: #475569;">
+                <div><strong>Total Pilgrims:</strong> {{ permits|length }} Pax</div>
+                <div><strong>Generated:</strong> Ground Ops DMS</div>
+            </div>
+        </div>
+
+        <!-- Instructions Banner -->
+        <div style="margin-top: 20px; padding: 12px 16px; background: #f8fafc; border-left: 4px solid #059669; border-radius: 6px; font-size: 12px; color: #334155;">
+            <strong>Guide Instructions:</strong> Men slots enter via Gate 37 (Bab Ali). Women slots enter via Gate 32 (Bab Uthman). Please verify physical/Nusuk QR permits and check off each pilgrim as they cross the barrier.
+        </div>
+
+        <!-- Manifest Table -->
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 40px; text-align: center;">Entry</th>
+                    <th style="width: 120px;">Passport #</th>
+                    <th>Pilgrim Full Name</th>
+                    <th style="width: 70px;">Gender</th>
+                    <th style="width: 90px;">Group</th>
+                    <th style="width: 130px;">Permit Time</th>
+                    <th style="width: 90px;">Nusuk Status</th>
+                    <th style="width: 110px;">Assigned Guide</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in permits %}
+                <tr>
+                    <td style="text-align: center;">
+                        <input type="checkbox" style="width: 16px; height: 16px; cursor: pointer;">
+                    </td>
+                    <td>
+                        <span class="passport-mono">{{ p.passport_number }}</span>
+                    </td>
+                    <td>
+                        <strong>{{ p.pilgrim_name }}</strong>
+                    </td>
+                    <td>
+                        {{ p.gender }}
+                    </td>
+                    <td>
+                        {{ p.group_code }}
+                    </td>
+                    <td>
+                        <strong>{{ p.slot_time }}</strong>
+                        <div style="font-size: 10px; color: #64748b;">{{ p.permit_date }}</div>
+                    </td>
+                    <td>
+                        <span class="status-badge status-{{ p.status|lower }}">{{ p.status }}</span>
+                    </td>
+                    <td>
+                        {{ p.assigned_guide or '-' }}
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="8" style="text-align: center; padding: 30px; color: #64748b;">
+                        No permits registered in the system yet.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <!-- Sign-Off Section -->
+        <div style="margin-top: 40px; display: grid; grid-template-columns: 1fr 1fr; gap: 40px; font-size: 12px; padding-top: 20px; border-top: 1px dashed #cbd5e1;">
+            <div>
+                <div><strong>Lead Murshid / Guide Signature:</strong> _______________________</div>
+                <div style="margin-top: 6px; color: #64748b;">Name: ____________________________________</div>
+            </div>
+            <div style="text-align: right;">
+                <div><strong>Masjid an-Nabawi Gate Coordinator:</strong> __________________</div>
+                <div style="margin-top: 6px; color: #64748b;">Time of Clearance: ______________________</div>
+            </div>
+        </div>
+
+    </div>
+
+</body>
+</html>
+

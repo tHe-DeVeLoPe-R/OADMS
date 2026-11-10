@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Sign In - Urwat il Wusqa Operations DMS{% endblock %}
+
+{% block content %}
+<div style="min-height: 75vh; display: flex; align-items: center; justify-content: center;">
+    <div class="clay-card" style="max-width: 440px; width: 100%; padding: 2.25rem 2rem;">
+        
+        <div style="text-align: center; margin-bottom: 2rem;">
+            <div class="brand-badge" style="width: 76px; height: 76px; margin: 0 auto 1rem auto; border-radius: 20px; background: #ffffff; border: 2px solid #a7f3d0; box-shadow: 0 8px 24px rgba(6, 78, 59, 0.12); display: flex; align-items: center; justify-content: center; padding: 6px;">
+                <img src="{{ url_for('static', filename='images/logoutw.png') }}" alt="Urwat il Wusqa Logo" style="width: 60px; height: 60px; object-fit: contain;">
+            </div>
+            <h1 style="color: var(--primary-dark); font-size: 1.6rem; font-weight: 800;">
+                Administrator Portal
+            </h1>
+            <p style="color: var(--text-muted); font-size: 0.88rem; font-weight: 500;">
+                Urwat il Wusqa Travels &bull; Operations DMS
+            </p>
+        </div>
+
+        <form method="POST" action="{{ url_for('login') }}">
+            <div class="clay-input-group">
+                <label class="clay-input-label">
+                    <i class="fa-solid fa-user-shield" style="color: var(--primary);"></i> Admin Username
+                </label>
+                <input type="text" name="username" id="username" class="clay-input" required placeholder="Enter username (adminuser)" autofocus>
+            </div>
+
+            <div class="clay-input-group" style="margin-bottom: 1.75rem;">
+                <label class="clay-input-label">
+                    <i class="fa-solid fa-key" style="color: var(--accent-gold);"></i> Admin Password
+                </label>
+                <input type="password" name="password" id="password" class="clay-input" required placeholder="Enter password">
+            </div>
+
+            <button type="submit" class="clay-btn clay-btn-primary" style="width: 100%; padding: 0.95rem; font-size: 1.05rem;">
+                <i class="fa-solid fa-right-to-bracket"></i> Sign In to Dashboard
+            </button>
+        </form>
+
+        <!-- Quick 1-Click Fill -->
+        <div style="margin-top: 1.75rem; padding-top: 1.25rem; border-top: 1.5px dashed #cbd5e1; text-align: center;">
+            <button type="button" onclick="fillAdmin()" class="clay-btn clay-btn-sm" style="background: #fef3c7; color: #92400e; border: 1.5px solid #fde68a;">
+                <i class="fa-solid fa-bolt" style="color: #b45309;"></i> Autofill Admin (adminuser / ZAFAR@786)
+            </button>
+        </div>
+
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function fillAdmin() {
+    document.getElementById('username').value = 'adminuser';
+    document.getElementById('password').value = 'ZAFAR@786';
+}
+</script>
+{% endblock %}

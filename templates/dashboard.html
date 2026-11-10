@@ -1,0 +1,908 @@
+{% extends "base.html" %}
+
+{% block title %}Operations Dashboard - Urwat il Wusqa DMS{% endblock %}
+
+{% block content %}
+
+<!-- Professional Top Header with Single Unified Add Button -->
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 1rem;">
+    <div>
+        <h1 style="font-size: 1.7rem; font-weight: 800; color: #064e3b; display: flex; align-items: center; gap: 0.65rem;">
+            <i class="fa-solid fa-gauge-high" style="color: var(--primary);"></i> Operations Command Center
+        </h1>
+        <div style="font-size: 0.88rem; color: var(--text-muted); font-weight: 500;">
+            Urwat il Wusqa Travels &bull; Centralized Operations & Stakeholder Overview
+        </div>
+    </div>
+
+    <!-- The ONE and ONLY Add Operational Data Button on Dashboard -->
+    <a href="{{ url_for('add_record') }}" class="clay-btn clay-btn-primary" style="padding: 0.75rem 1.6rem; font-size: 0.95rem;">
+        <i class="fa-solid fa-circle-plus"></i> Add Operational Data
+    </a>
+</div>
+
+
+<!-- ===== GROUP SELECTOR BAND ===== -->
+{% if groups %}
+<div class="clay-card-flat" style="margin-bottom: 1.5rem; padding: 0.9rem 1.25rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%); border: 1.5px solid #a7f3d0;">
+    <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
+        <div class="clay-icon-bubble emerald" style="width: 36px; height: 36px; font-size: 1rem; flex-shrink: 0;">
+            <i class="fa-solid fa-layer-group"></i>
+        </div>
+        <div>
+            <div style="font-size: 0.72rem; font-weight: 700; color: #047857; text-transform: uppercase; letter-spacing: 0.05em;">Active Group</div>
+            {% if selected_group %}
+            <div style="font-size: 1rem; font-weight: 800; color: #064e3b;">{{ selected_group.group_code }} &mdash; {{ selected_group.group_name }}</div>
+            <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 1px;">
+                <i class="fa-solid fa-user-tie" style="color: var(--primary);"></i> {{ selected_group.leader_name or 'No Leader Set' }}
+                &nbsp;&bull;&nbsp;
+                <i class="fa-solid fa-users" style="color: var(--primary);"></i> {{ selected_group.total_pax }} Pilgrims
+                {% if selected_group.arrival_date %}&nbsp;&bull;&nbsp;<i class="fa-solid fa-plane-arrival" style="color: var(--primary);"></i> KSA {{ selected_group.arrival_date }}{% endif %}
+                {% if selected_group.departure_date %}&nbsp;&bull;&nbsp;<i class="fa-solid fa-plane-departure" style="color: #dc2626;"></i> Return {{ selected_group.departure_date }}{% endif %}
+            </div>
+            {% else %}
+            <div style="font-size: 0.9rem; color: var(--text-muted);">No group selected. Create your first group.</div>
+            {% endif %}
+        </div>
+    </div>
+    <div style="display: flex; align-items: center; gap: 0.65rem; flex-wrap: wrap;">
+        {% if selected_group_code %}
+        <a href="{{ url_for('group_voucher', group_code=selected_group_code) }}" target="_blank"
+           class="clay-btn clay-btn-sm" style="background: #064e3b; color: #fff; font-size: 0.82rem; white-space: nowrap;">
+            <i class="fa-solid fa-file-contract"></i> Group Voucher
+        </a>
+        {% endif %}
+        {% if groups|length > 1 %}
+        <form method="GET" action="{{ url_for('dashboard') }}" id="groupSelectorForm" style="display: flex; align-items: center; gap: 0.5rem;">
+            <label style="font-size: 0.78rem; font-weight: 700; color: #047857; white-space: nowrap;">
+                <i class="fa-solid fa-arrows-rotate"></i> Switch:
+            </label>
+            <select name="group" class="clay-select" style="min-width: 180px; padding: 0.45rem 0.85rem; font-size: 0.85rem;" onchange="this.form.submit()">
+                {% for g in groups %}
+                <option value="{{ g.group_code }}" {% if g.group_code == selected_group_code %}selected{% endif %}>
+                    {{ g.group_code }} ({{ g.total_pax }} Pax)
+                </option>
+                {% endfor %}
+            </select>
+        </form>
+        {% endif %}
+    </div>
+</div>
+{% else %}
+<div class="clay-card-flat" style="margin-bottom: 1.5rem; padding: 1rem 1.25rem; background: #fffbeb; border: 1.5px solid #fde68a; border-radius: 14px; text-align: center;">
+    <i class="fa-solid fa-circle-info" style="color: #d97706;"></i>
+    <span style="font-size: 0.88rem; font-weight: 600; color: #92400e; margin-left: 0.5rem;">No pilgrim groups created yet.
+        <a href="{{ url_for('add_record') }}#group" style="color: var(--primary); font-weight: 800;">Create your first group &rarr;</a>
+    </span>
+</div>
+{% endif %}
+
+<!-- Active Ground Alerts (If Any) -->
+{% if open_incidents %}
+<div class="clay-card-flat" style="margin-bottom: 1.5rem; background: #fff7ed; border-left: 6px solid #ea580c; border-color: #ffedd5;">
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
+        <div style="display: flex; align-items: center; gap: 0.85rem;">
+            <div class="clay-icon-bubble coral" style="width: 40px; height: 40px; font-size: 1.15rem;">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <div>
+                <div style="font-weight: 800; color: #9a3412; font-size: 0.95rem;">
+                    {{ open_incidents|length }} Active Incident(s) Logged on Ground
+                </div>
+                <div style="font-size: 0.85rem; color: #c2410c;">
+                    {{ open_incidents[0].category }}: {{ open_incidents[0].description }}
+                </div>
+            </div>
+        </div>
+        <button type="button" onclick="openModal('incidentsModal')" class="clay-btn clay-btn-sm" style="background: #ffffff; color: #c2410c;">
+            <i class="fa-solid fa-eye"></i> View Incident Details
+        </button>
+    </div>
+</div>
+{% endif %}
+
+<!-- Top Stats Grid -->
+<div class="stats-grid">
+    <div class="clay-card stat-card">
+        <div class="clay-icon-bubble emerald">
+            <i class="fa-solid fa-users"></i>
+        </div>
+        <div>
+            <div class="stat-label">Active Pilgrims</div>
+            <div class="stat-number">{{ stats.active_pax }}</div>
+            <div style="font-size: 0.76rem; color: var(--text-muted); font-weight: 600;">
+                {{ stats.active_groups }} Registered Group(s)
+            </div>
+        </div>
+    </div>
+
+    <div class="clay-card stat-card">
+        <div class="clay-icon-bubble gold">
+            <i class="fa-solid fa-mosque"></i>
+        </div>
+        <div>
+            <div class="stat-label">Permits Tracked</div>
+            <div class="stat-number">{{ stats.total_permits }}</div>
+            <div style="font-size: 0.76rem; font-weight: 700;">
+                <span style="color: #d97706;">{{ stats.upcoming_permits }} Upcoming</span> &bull; 
+                <span style="color: #065f46;">{{ stats.completed_permits }} Done</span> &bull;
+                <span style="color: #dc2626;">{{ stats.missed_permits }} Miss</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="clay-card stat-card">
+        <div class="clay-icon-bubble sky">
+            <i class="fa-solid fa-bus-simple"></i>
+        </div>
+        <div>
+            <div class="stat-label">Zyarat Trips</div>
+            <div class="stat-number">{{ stats.zyarat_count }}</div>
+            <div style="font-size: 0.76rem; color: var(--text-muted); font-weight: 600;">
+                Makkah / Madinah
+            </div>
+        </div>
+    </div>
+
+    <div class="clay-card stat-card">
+        <div class="clay-icon-bubble purple">
+            <i class="fa-solid fa-plane-arrival"></i>
+        </div>
+        <div>
+            <div class="stat-label">Flights Tracked</div>
+            <div class="stat-number">{{ stats.flights_count }}</div>
+            <div style="font-size: 0.76rem; color: var(--text-muted); font-weight: 600;">
+                Arrivals / Departures
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ========================================================================= -->
+<!-- STAKEHOLDER CHARTS (PIE, BAR, LINE)                                       -->
+<!-- ========================================================================= -->
+<div class="charts-grid">
+    <!-- Chart 1: Bar Chart - Zyarat Attendance Comparison -->
+    <div class="chart-card">
+        <div class="chart-header">
+            <div class="chart-title">
+                <i class="fa-solid fa-chart-column" style="color: var(--primary);"></i> Zyarat Boarding Attendance
+            </div>
+            <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 600;">Booked vs. Actual Pax</span>
+        </div>
+        <div class="chart-canvas-wrapper">
+            <canvas id="zyaratBarChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Chart 2: Donut / Pie Chart - Permit Status Breakdown (Upcoming / Completed / Missed) -->
+    <div class="chart-card">
+        <div class="chart-header">
+            <div class="chart-title">
+                <i class="fa-solid fa-chart-pie" style="color: var(--accent-gold);"></i> Riaz Ul Jannah Permit Status
+            </div>
+            <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 600;">Upcoming vs. Done vs. Missed</span>
+        </div>
+        <div class="chart-canvas-wrapper">
+            <canvas id="permitPieChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- Chart 3: Line Chart - Travel & Movement Volume -->
+<div class="chart-card" style="margin-bottom: 1.75rem;">
+    <div class="chart-header">
+        <div class="chart-title">
+            <i class="fa-solid fa-chart-line" style="color: var(--accent-sky);"></i> Movement & Transit Volume Timeline
+        </div>
+        <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 600;">Passenger Flow</span>
+    </div>
+    <div class="chart-canvas-wrapper" style="max-height: 220px;">
+        <canvas id="timelineLineChart"></canvas>
+    </div>
+</div>
+
+<!-- ========================================================================= -->
+<!-- SECTION 1: 🕌 RIAZ UL JANNAH PERMITS (EXACT FIELDS COMPACT VIEW)          -->
+<!-- ========================================================================= -->
+<div class="clay-card" style="margin-bottom: 1.75rem;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+        <div style="display: flex; align-items: center; gap: 0.65rem;">
+            <div class="clay-icon-bubble gold" style="width: 40px; height: 40px; font-size: 1.2rem;">
+                <i class="fa-solid fa-kaaba"></i>
+            </div>
+            <div>
+                <h2 style="font-size: 1.2rem; font-weight: 800; color: #064e3b;">
+                    Riaz Ul Jannah Permit Tracker
+                </h2>
+                <div style="font-size: 0.8rem; color: var(--text-muted);">
+                    Passport, Visa, WhatsApp, Slot Time, Status & Permit Type.
+                </div>
+            </div>
+        </div>
+        <span class="status-chip" style="background: #f1f5f9; color: #334155;">{{ permits|length }} Permits Total</span>
+    </div>
+
+    {% if permits %}
+        <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+            {% for p in permits %}
+            <div class="compact-card" style="border-left: 5px solid {% if p.status == 'Completed' %}#059669{% elif p.status == 'Upcoming' %}#d97706{% else %}#dc2626{% endif %};">
+                <div style="display: flex; align-items: center; gap: 0.75rem; flex: 1; min-width: 240px;">
+                    <div>
+                        <!-- Passport & Visa badges -->
+                        <span class="passport-badge">
+                            <i class="fa-solid fa-passport" style="color: var(--primary); margin-right: 4px;"></i>{{ p.passport_number }}
+                        </span>
+                        <span class="clay-inset" style="padding: 2px 7px; font-size: 0.76rem; font-weight: 700; margin-left: 6px;">
+                            <i class="fa-solid fa-stamp" style="color: var(--accent-sky); margin-right: 3px;"></i>Visa: {{ p.visa_number }}
+                        </span>
+
+                        <!-- Date & Time -->
+                        <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">
+                            <i class="fa-solid fa-calendar-day" style="color: var(--primary);"></i> <strong>{{ p.permit_date }}</strong> at <strong>{{ p.slot_time }}</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="display: flex; align-items: center; gap: 0.65rem; flex-wrap: wrap;">
+                    <!-- Permit Type Badge -->
+                    <span class="status-chip" style="{% if p.permit_type == 'Managed on Wheel Chair' %}background: #f3e8ff; color: #7e22ce; border: 1px solid #e9d5ff;{% elif p.permit_type == 'Managed by Cash' %}background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0;{% else %}background: #f1f5fa; color: #334155; border: 1px solid #cbd5e1;{% endif %}">
+                        {% if p.permit_type == 'Managed on Wheel Chair' %}
+                            <i class="fa-solid fa-wheelchair"></i>
+                        {% elif p.permit_type == 'Managed by Cash' %}
+                            <i class="fa-solid fa-money-bill-wave"></i>
+                        {% else %}
+                            <i class="fa-solid fa-user-check"></i>
+                        {% endif %}
+                        {{ p.permit_type }}
+                    </span>
+
+                    <!-- Status Chip -->
+                    <span class="status-chip" style="{% if p.status == 'Completed' %}background: #d1fae5; color: #065f46; border: 1px solid #a7f3d0;{% elif p.status == 'Upcoming' %}background: #fef3c7; color: #92400e; border: 1px solid #fde68a;{% else %}background: #fee2e2; color: #991b1b; border: 1px solid #fecaca;{% endif %}">
+                        {% if p.status == 'Completed' %}
+                            <i class="fa-solid fa-circle-check"></i>
+                        {% elif p.status == 'Upcoming' %}
+                            <i class="fa-solid fa-clock"></i>
+                        {% else %}
+                            <i class="fa-solid fa-circle-xmark"></i>
+                        {% endif %}
+                        {{ p.status }}
+                    </span>
+
+                    <!-- Details Popup Trigger -->
+                    <button type="button" onclick="openModal('permitModal{{ p.id }}')" class="clay-btn clay-btn-sm clay-btn-secondary">
+                        <i class="fa-solid fa-circle-info"></i> Details
+                    </button>
+                </div>
+            </div>
+
+            <!-- Permit Details Modal / Popup -->
+            <div class="clay-modal-overlay" id="permitModal{{ p.id }}">
+                <div class="clay-modal">
+                    <div class="modal-header">
+                        <div style="display: flex; align-items: center; gap: 0.65rem;">
+                            <div class="clay-icon-bubble gold" style="width: 36px; height: 36px; font-size: 1.1rem;">
+                                <i class="fa-solid fa-kaaba"></i>
+                            </div>
+                            <h3 style="font-size: 1.15rem; font-weight: 800; color: #064e3b;">
+                                Riaz Ul Jannah Permit Details
+                            </h3>
+                        </div>
+                        <button type="button" onclick="closeModal('permitModal{{ p.id }}')" class="modal-close-btn">&times;</button>
+                    </div>
+
+                    <div style="margin-bottom: 1.25rem;">
+                        <div class="detail-row">
+                            <span class="detail-label">Passport Number</span>
+                            <span class="detail-val"><span class="passport-badge">{{ p.passport_number }}</span></span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Visa Number</span>
+                            <span class="detail-val" style="font-family: monospace; font-weight: 700;">{{ p.visa_number }}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Pilgrim WhatsApp</span>
+                            <span class="detail-val">
+                                {% if p.pilgrim_whatsapp %}
+                                    <a href="https://wa.me/{{ p.pilgrim_whatsapp|replace('+', '')|replace(' ', '') }}" target="_blank" style="color: #25d366; text-decoration: none; font-weight: 700;">
+                                        <i class="fa-brands fa-whatsapp"></i> {{ p.pilgrim_whatsapp }}
+                                    </a>
+                                {% else %}
+                                    <span style="color: var(--text-muted);">Not provided</span>
+                                {% endif %}
+                            </span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Permit Date & Time</span>
+                            <span class="detail-val">{{ p.permit_date }} at {{ p.slot_time }}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Permit Type</span>
+                            <span class="detail-val" style="color: var(--primary);">{{ p.permit_type }}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Current Status</span>
+                            <span class="detail-val">
+                                <span class="status-chip" style="{% if p.status == 'Completed' %}background: #d1fae5; color: #065f46;{% elif p.status == 'Upcoming' %}background: #fef3c7; color: #92400e;{% else %}background: #fee2e2; color: #991b1b;{% endif %}">
+                                    {{ p.status }}
+                                </span>
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Quick Status Update Form inside Popup -->
+                    <form method="POST" action="{{ url_for('update_permit_status', permit_id=p.id) }}" style="margin-bottom: 1.25rem; padding: 0.85rem; background: #f8fafc; border-radius: 12px; display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; flex-wrap: wrap;">
+                        <span style="font-size: 0.82rem; font-weight: 700; color: var(--text-secondary);">Update Status:</span>
+                        <div style="display: flex; gap: 0.4rem;">
+                            <button type="submit" name="status" value="Upcoming" class="clay-btn clay-btn-sm" style="background: #fef3c7; color: #92400e; font-size: 0.75rem;">Upcoming</button>
+                            <button type="submit" name="status" value="Completed" class="clay-btn clay-btn-sm" style="background: #d1fae5; color: #065f46; font-size: 0.75rem;">Completed</button>
+                            <button type="submit" name="status" value="Missed" class="clay-btn clay-btn-sm" style="background: #fee2e2; color: #991b1b; font-size: 0.75rem;">Missed</button>
+                        </div>
+                    </form>
+
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <form method="POST" action="{{ url_for('delete_entry', model_type='permit', item_id=p.id) }}" onsubmit="return confirm('Delete this permit?')">
+                            <button type="submit" class="clay-btn clay-btn-sm" style="color: #dc2626;">
+                                <i class="fa-solid fa-trash-can"></i> Delete Permit
+                            </button>
+                        </form>
+                        <button type="button" onclick="closeModal('permitModal{{ p.id }}')" class="clay-btn clay-btn-sm clay-btn-primary">
+                            Close
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div style="padding: 2rem; text-align: center; color: var(--text-muted); font-size: 0.9rem;">
+            No Riaz Ul Jannah permits entered yet. Click "Add Operational Data" to record permits.
+        </div>
+    {% endif %}
+</div>
+
+<!-- ========================================================================= -->
+<!-- SECTION 2: 🚌 ZYARAT & BUS ATTENDANCE (COMPACT VIEW)                      -->
+<!-- ========================================================================= -->
+<div class="clay-card" style="margin-bottom: 1.75rem;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+        <div style="display: flex; align-items: center; gap: 0.65rem;">
+            <div class="clay-icon-bubble sky" style="width: 40px; height: 40px; font-size: 1.2rem;">
+                <i class="fa-solid fa-bus-simple"></i>
+            </div>
+            <div>
+                <h2 style="font-size: 1.2rem; font-weight: 800; color: #064e3b;">
+                    Zyarat & Bus Movement Logs
+                </h2>
+                <div style="font-size: 0.8rem; color: var(--text-muted);">Compact summary with on-demand detailed view.</div>
+            </div>
+        </div>
+        <span class="status-chip" style="background: #f1f5f9; color: #334155;">{{ zyarat_list|length }} Trips Total</span>
+    </div>
+
+    {% if zyarat_list %}
+        <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+            {% for z in zyarat_list %}
+            <div class="compact-card" style="border-left: 5px solid {% if z.actual_pax < z.booked_pax %}#dc2626{% else %}#059669{% endif %};">
+                <div style="display: flex; align-items: center; gap: 0.75rem; flex: 1; min-width: 240px;">
+                    <div>
+                        <span class="clay-inset" style="padding: 2px 7px; font-size: 0.76rem; font-weight: 700;">
+                            {{ z.group_code }}
+                        </span>
+                        <strong style="margin-left: 8px; font-size: 1rem; color: #0f172a;">
+                            {{ z.destination }}
+                        </strong>
+                        <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 2px;">
+                            <i class="fa-solid fa-location-dot" style="color: var(--primary);"></i> {{ z.city }} &bull; {{ z.zyarat_date }} at {{ z.departure_time }}
+                        </div>
+                    </div>
+                </div>
+
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    {% if z.actual_pax < z.booked_pax %}
+                        <span class="status-chip status-missing">
+                            <i class="fa-solid fa-triangle-exclamation"></i> {{ z.actual_pax }} / {{ z.booked_pax }} Pax
+                        </span>
+                    {% else %}
+                        <span class="status-chip status-confirmed">
+                            <i class="fa-solid fa-circle-check"></i> {{ z.actual_pax }} / {{ z.booked_pax }} Pax
+                        </span>
+                    {% endif %}
+
+                    <span class="status-chip" style="background: #e2e8f0; color: #1e293b;">
+                        {{ z.status }}
+                    </span>
+
+                    <button type="button" onclick="openModal('zyaratModal{{ z.id }}')" class="clay-btn clay-btn-sm clay-btn-secondary">
+                        <i class="fa-solid fa-circle-info"></i> Details
+                    </button>
+                </div>
+            </div>
+
+            <!-- Zyarat Details Modal / Popup -->
+            <div class="clay-modal-overlay" id="zyaratModal{{ z.id }}">
+                <div class="clay-modal">
+                    <div class="modal-header">
+                        <div style="display: flex; align-items: center; gap: 0.65rem;">
+                            <div class="clay-icon-bubble sky" style="width: 36px; height: 36px; font-size: 1.1rem;">
+                                <i class="fa-solid fa-bus"></i>
+                            </div>
+                            <h3 style="font-size: 1.15rem; font-weight: 800; color: #064e3b;">
+                                Zyarat Trip Details
+                            </h3>
+                        </div>
+                        <button type="button" onclick="closeModal('zyaratModal{{ z.id }}')" class="modal-close-btn">&times;</button>
+                    </div>
+
+                    <div style="margin-bottom: 1.25rem;">
+                        <div class="detail-row">
+                            <span class="detail-label">Destination</span>
+                            <span class="detail-val">{{ z.destination }}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Holy City</span>
+                            <span class="detail-val">{{ z.city }}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Group Code</span>
+                            <span class="detail-val">{{ z.group_code }}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Date & Time</span>
+                            <span class="detail-val">{{ z.zyarat_date }} at {{ z.departure_time }}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Passenger Attendance</span>
+                            <span class="detail-val">
+                                {{ z.actual_pax }} Boarded / {{ z.booked_pax }} Expected
+                                {% if z.actual_pax < z.booked_pax %}
+                                    <span style="color: #dc2626; font-size: 0.8rem; display: block;">(⚠️ {{ z.booked_pax - z.actual_pax }} Pilgrim Missing)</span>
+                                {% endif %}
+                            </span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Assigned Murshid</span>
+                            <span class="detail-val">{{ z.guide_murshid }}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Bus Number Plate</span>
+                            <span class="detail-val">{{ z.bus_number or 'Not assigned' }}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Driver Contact</span>
+                            <span class="detail-val">
+                                {{ z.driver_name or 'Driver' }}
+                                {% if z.driver_phone %}
+                                    <a href="tel:{{ z.driver_phone }}" style="color: var(--primary); margin-left: 6px;">{{ z.driver_phone }}</a>
+                                {% endif %}
+                            </span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Trip Status</span>
+                            <span class="detail-val">{{ z.status }}</span>
+                        </div>
+                        {% if z.notes %}
+                        <div class="detail-row">
+                            <span class="detail-label">Dispatch Notes</span>
+                            <span class="detail-val" style="color: #991b1b;">{{ z.notes }}</span>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <form method="POST" action="{{ url_for('delete_entry', model_type='zyarat', item_id=z.id) }}" onsubmit="return confirm('Remove this Zyarat record?')">
+                            <button type="submit" class="clay-btn clay-btn-sm" style="color: #dc2626;">
+                                <i class="fa-solid fa-trash-can"></i> Delete
+                            </button>
+                        </form>
+                        <button type="button" onclick="closeModal('zyaratModal{{ z.id }}')" class="clay-btn clay-btn-sm clay-btn-primary">
+                            Close
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div style="padding: 2rem; text-align: center; color: var(--text-muted); font-size: 0.9rem;">
+            No Zyarat excursions logged yet. Click "Add Operational Data" to record a trip.
+        </div>
+    {% endif %}
+</div>
+
+
+<!-- ========================================================================= -->
+<!-- SECTION 0: 👤 PILGRIM ROSTER (COMPACT)                                    -->
+<!-- ========================================================================= -->
+<div class="clay-card" style="margin-bottom: 1.75rem;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+        <div style="display: flex; align-items: center; gap: 0.65rem;">
+            <div class="clay-icon-bubble emerald" style="width: 40px; height: 40px; font-size: 1.2rem;">
+                <i class="fa-solid fa-users-rectangle"></i>
+            </div>
+            <div>
+                <h2 style="font-size: 1.2rem; font-weight: 800; color: #064e3b;">Pilgrim Roster</h2>
+                <div style="font-size: 0.8rem; color: var(--text-muted);">Names, passport numbers and references for this group.</div>
+            </div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 0.65rem;">
+            <span class="status-chip" style="background: #f1f5f9; color: #334155;">{{ pilgrims_roster|length }} Registered</span>
+            {% if selected_group_code %}
+            <a href="{{ url_for('group_voucher', group_code=selected_group_code) }}" target="_blank"
+               class="clay-btn clay-btn-sm" style="background: #064e3b; color: #fff;">
+                <i class="fa-solid fa-file-contract"></i> Group Voucher
+            </a>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if pilgrims_roster %}
+    <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse; font-size: 0.84rem;">
+            <thead>
+                <tr style="background: #f0fdf4;">
+                    <th style="padding: 0.6rem 0.9rem; text-align: left; font-size: 0.7rem; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; color: #047857; border-bottom: 2px solid #a7f3d0;">#</th>
+                    <th style="padding: 0.6rem 0.9rem; text-align: left; font-size: 0.7rem; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; color: #047857; border-bottom: 2px solid #a7f3d0;">Name</th>
+                    <th style="padding: 0.6rem 0.9rem; text-align: left; font-size: 0.7rem; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; color: #047857; border-bottom: 2px solid #a7f3d0;">Passport</th>
+                    <th style="padding: 0.6rem 0.9rem; text-align: left; font-size: 0.7rem; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; color: #047857; border-bottom: 2px solid #a7f3d0;">Reference By</th>
+                    <th style="padding: 0.6rem 0.9rem; text-align: left; font-size: 0.7rem; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; color: #047857; border-bottom: 2px solid #a7f3d0;"><i class="fa-brands fa-whatsapp" style="color: #25d366;"></i> WhatsApp</th>
+                    <th style="padding: 0.6rem 0.9rem; text-align: right; border-bottom: 2px solid #a7f3d0;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in pilgrims_roster %}
+                <tr style="border-bottom: 1px solid #f1f5f9;">
+                    <td style="padding: 0.65rem 0.9rem; color: var(--text-muted); font-weight: 700;">{{ loop.index }}</td>
+                    <td style="padding: 0.65rem 0.9rem; font-weight: 700; color: #0f172a;">
+                        <i class="fa-solid fa-user" style="color: var(--primary); margin-right: 5px;"></i>{{ p.name }}
+                    </td>
+                    <td style="padding: 0.65rem 0.9rem;">
+                        {% if p.passport_number %}
+                        <span style="font-family: monospace; font-weight: 700; background: #f1f5f9; padding: 2px 7px; border-radius: 6px;">{{ p.passport_number }}</span>
+                        {% else %}<span style="color: var(--text-muted);">—</span>{% endif %}
+                    </td>
+                    <td style="padding: 0.65rem 0.9rem; color: var(--text-muted);">{{ p.reference_by or '—' }}</td>
+                    <td style="padding: 0.65rem 0.9rem;">
+                        {% if p.contact %}
+                        <a href="https://wa.me/{{ p.contact|replace('+', '')|replace(' ', '')|replace('-', '') }}" target="_blank" rel="noopener noreferrer" style="color: #047857; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 5px;" title="Chat on WhatsApp">
+                            <i class="fa-brands fa-whatsapp" style="color: #25d366; font-size: 1rem;"></i> {{ p.contact }}
+                        </a>
+                        {% else %}<span style="color: var(--text-muted);">—</span>{% endif %}
+                    </td>
+                    <td style="padding: 0.65rem 0.9rem; text-align: right; white-space: nowrap;">
+                        <button type="button" onclick="openModal('editPilgrimModal{{ p.id }}')" class="clay-btn clay-btn-sm clay-btn-secondary" style="padding: 0.25rem 0.65rem; margin-right: 4px;" title="Edit Pilgrim">
+                            <i class="fa-solid fa-pen-to-square"></i> Edit
+                        </button>
+                        <form method="POST" action="{{ url_for('delete_entry', model_type='pilgrim', item_id=p.id) }}" onsubmit="return confirm('Remove pilgrim {{ p.name }}?')" style="display: inline;">
+                            <button type="submit" class="clay-btn clay-btn-sm" style="color: #dc2626; padding: 0.25rem 0.55rem;" title="Remove">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+
+                <!-- Edit Pilgrim Modal -->
+                <div class="clay-modal-overlay" id="editPilgrimModal{{ p.id }}">
+                    <div class="clay-modal">
+                        <div class="modal-header">
+                            <div style="display: flex; align-items: center; gap: 0.65rem;">
+                                <div class="clay-icon-bubble emerald" style="width: 36px; height: 36px; font-size: 1.1rem;">
+                                    <i class="fa-solid fa-user-pen"></i>
+                                </div>
+                                <h3 style="font-size: 1.15rem; font-weight: 800; color: #064e3b;">
+                                    Edit Pilgrim Details
+                                </h3>
+                            </div>
+                            <button type="button" onclick="closeModal('editPilgrimModal{{ p.id }}')" class="modal-close-btn">&times;</button>
+                        </div>
+
+                        <form method="POST" action="{{ url_for('update_pilgrim', pilgrim_id=p.id) }}">
+                            <div style="display: grid; grid-template-columns: 1fr; gap: 0.85rem; margin-bottom: 1.25rem; text-align: left;">
+                                <div class="clay-input-group">
+                                    <label class="clay-input-label">
+                                        <i class="fa-solid fa-layer-group" style="color: var(--primary);"></i> Pilgrim Group *
+                                    </label>
+                                    <select name="group_code" class="clay-select" required>
+                                        {% for g in groups %}
+                                            <option value="{{ g.group_code }}" {% if g.group_code == p.group_code %}selected{% endif %}>
+                                                {{ g.group_code }} - {{ g.group_name }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+
+                                <div class="clay-input-group">
+                                    <label class="clay-input-label">
+                                        <i class="fa-solid fa-user" style="color: var(--primary);"></i> Full Name *
+                                    </label>
+                                    <input type="text" name="name" value="{{ p.name }}" required class="clay-input">
+                                </div>
+
+                                <div class="clay-input-group">
+                                    <label class="clay-input-label">
+                                        <i class="fa-solid fa-passport" style="color: var(--primary);"></i> Passport Number
+                                    </label>
+                                    <input type="text" name="passport_number" value="{{ p.passport_number or '' }}" class="clay-input" style="text-transform: uppercase;">
+                                </div>
+
+                                <div class="clay-input-group">
+                                    <label class="clay-input-label">
+                                        <i class="fa-solid fa-handshake" style="color: var(--primary);"></i> Reference By
+                                    </label>
+                                    <input type="text" name="reference_by" value="{{ p.reference_by or '' }}" class="clay-input">
+                                </div>
+
+                                <div class="clay-input-group">
+                                    <label class="clay-input-label">
+                                        <i class="fa-brands fa-whatsapp" style="color: #25d366;"></i> WhatsApp Contact Number
+                                    </label>
+                                    <input type="text" name="contact" value="{{ p.contact or '' }}" placeholder="e.g. +923001234567" class="clay-input">
+                                </div>
+
+                                <div class="clay-input-group">
+                                    <label class="clay-input-label">
+                                        <i class="fa-solid fa-location-dot" style="color: var(--primary);"></i> Home Address
+                                    </label>
+                                    <input type="text" name="address" value="{{ p.address or '' }}" class="clay-input">
+                                </div>
+                            </div>
+
+                            <div style="display: flex; justify-content: space-between; align-items: center; gap: 0.75rem;">
+                                <button type="button" onclick="closeModal('editPilgrimModal{{ p.id }}')" class="clay-btn clay-btn-secondary clay-btn-sm">
+                                    Cancel
+                                </button>
+                                <button type="submit" class="clay-btn clay-btn-primary clay-btn-sm">
+                                    <i class="fa-solid fa-check"></i> Save Changes
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div style="padding: 2rem; text-align: center; color: var(--text-muted); font-size: 0.9rem;">
+        <i class="fa-solid fa-user-plus" style="font-size: 1.75rem; display: block; margin-bottom: 0.5rem; opacity: .35;"></i>
+        No pilgrims added yet. Use <strong>Add Operational Data → Section 7</strong> to register pilgrims.
+    </div>
+    {% endif %}
+</div>
+
+<!-- ========================================================================= -->
+<!-- SECTION 3: ✈️ FLIGHT SCHEDULE & 🏨 HOTEL STAGING (COMPACT)               -->
+<!-- ========================================================================= -->
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem;">
+    
+    <!-- Flights Grid -->
+    <div class="clay-card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+            <div style="display: flex; align-items: center; gap: 0.65rem;">
+                <div class="clay-icon-bubble purple" style="width: 38px; height: 38px; font-size: 1.15rem;">
+                    <i class="fa-solid fa-plane-arrival"></i>
+                </div>
+                <h2 style="font-size: 1.15rem; font-weight: 800; color: #064e3b;">
+                    Flight Movements
+                </h2>
+            </div>
+            <span class="status-chip" style="background: #f1f5f9; color: #334155;">{{ flights|length }} Flights</span>
+        </div>
+
+        {% if flights %}
+            <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                {% for f in flights %}
+                <div class="compact-card">
+                    <div>
+                        <strong style="color: #0f172a; font-size: 0.98rem;">
+                            <i class="fa-solid fa-plane" style="color: #7e22ce;"></i> {{ f.flight_number }}
+                        </strong>
+                        <span style="font-size: 0.76rem; color: var(--text-muted); margin-left: 4px;">({{ f.airline or f.group_code }})</span>
+                        <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 2px;">
+                            {{ f.route_type }} &bull; {{ f.airport }} &bull; <strong>{{ f.pax_count }} Pax</strong>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <span class="status-chip" style="background: #e0f2fe; color: #0369a1; font-size: 0.72rem;">
+                            {{ f.status }}
+                        </span>
+                        <button type="button" onclick="openModal('flightModal{{ f.id }}')" class="clay-btn clay-btn-sm clay-btn-secondary" style="padding: 0.35rem 0.65rem;">
+                            <i class="fa-solid fa-circle-info"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Flight Details Modal -->
+                <div class="clay-modal-overlay" id="flightModal{{ f.id }}">
+                    <div class="clay-modal">
+                        <div class="modal-header">
+                            <div style="display: flex; align-items: center; gap: 0.65rem;">
+                                <div class="clay-icon-bubble purple" style="width: 36px; height: 36px; font-size: 1.1rem;">
+                                    <i class="fa-solid fa-plane"></i>
+                                </div>
+                                <h3 style="font-size: 1.15rem; font-weight: 800; color: #064e3b;">
+                                    Flight Schedule Details
+                                </h3>
+                            </div>
+                            <button type="button" onclick="closeModal('flightModal{{ f.id }}')" class="modal-close-btn">&times;</button>
+                        </div>
+                        <div style="margin-bottom: 1.25rem;">
+                            <div class="detail-row">
+                                <span class="detail-label">Flight Number</span>
+                                <span class="detail-val">{{ f.flight_number }}</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Airline</span>
+                                <span class="detail-val">{{ f.airline or 'Commercial Airline' }}</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Group Code</span>
+                                <span class="detail-val">{{ f.group_code }}</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Movement Type</span>
+                                <span class="detail-val">{{ f.route_type }}</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Airport</span>
+                                <span class="detail-val">{{ f.airport }}</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Date & Time</span>
+                                <span class="detail-val">{{ f.flight_date or '' }} {{ f.flight_time or '' }}</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Passenger Count</span>
+                                <span class="detail-val">{{ f.pax_count }} Pax</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Transport Assigned</span>
+                                <span class="detail-val">{{ f.transport_assigned or 'Unassigned' }}</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Status</span>
+                                <span class="detail-val">{{ f.status }}</span>
+                            </div>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <form method="POST" action="{{ url_for('delete_entry', model_type='flight', item_id=f.id) }}" onsubmit="return confirm('Remove flight?')">
+                                <button type="submit" class="clay-btn clay-btn-sm" style="color: #dc2626;">
+                                    <i class="fa-solid fa-trash-can"></i> Delete
+                                </button>
+                            </form>
+                            <button type="button" onclick="closeModal('flightModal{{ f.id }}')" class="clay-btn clay-btn-sm clay-btn-primary">
+                                Close
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div style="padding: 1.75rem 1rem; text-align: center; color: var(--text-muted); font-size: 0.85rem;">
+                No flights scheduled yet.
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Hotels Grid -->
+    <div class="clay-card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+            <div style="display: flex; align-items: center; gap: 0.65rem;">
+                <div class="clay-icon-bubble emerald" style="width: 38px; height: 38px; font-size: 1.15rem;">
+                    <i class="fa-solid fa-hotel"></i>
+                </div>
+                <h2 style="font-size: 1.15rem; font-weight: 800; color: #064e3b;">
+                    Hotel Allocations
+                </h2>
+            </div>
+            <span class="status-chip" style="background: #f1f5f9; color: #334155;">{{ hotels|length }} Vouchers</span>
+        </div>
+
+        {% if hotels %}
+            <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                {% for h in hotels %}
+                <div class="compact-card">
+                    <div>
+                        <strong style="color: #0f172a; font-size: 0.98rem;">
+                            <i class="fa-solid fa-building" style="color: var(--primary);"></i> {{ h.hotel_name }}
+                        </strong>
+                        <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 2px;">
+                            {{ h.city }} &bull; {{ h.rooms_allocated }} Rooms &bull; Group {{ h.group_code }}
+                        </div>
+                    </div>
+
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <span class="status-chip status-confirmed" style="font-size: 0.72rem;">
+                            {{ h.voucher_status }}
+                        </span>
+                        <button type="button" onclick="openModal('hotelModal{{ h.id }}')" class="clay-btn clay-btn-sm clay-btn-secondary" style="padding: 0.35rem 0.65rem;">
+                            <i class="fa-solid fa-circle-info"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Hotel Details Modal -->
+                <div class="clay-modal-overlay" id="hotelModal{{ h.id }}">
+                    <div class="clay-modal">
+                        <div class="modal-header">
+                            <div style="display: flex; align-items: center; gap: 0.65rem;">
+                                <div class="clay-icon-bubble emerald" style="width: 36px; height: 36px; font-size: 1.1rem;">
+                                    <i class="fa-solid fa-hotel"></i>
+                                </div>
+                                <h3 style="font-size: 1.15rem; font-weight: 800; color: #064e3b;">
+                                    Hotel Allocation Details
+                                </h3>
+                            </div>
+                            <button type="button" onclick="closeModal('hotelModal{{ h.id }}')" class="modal-close-btn">&times;</button>
+                        </div>
+                        <div style="margin-bottom: 1.25rem;">
+                            <div class="detail-row">
+                                <span class="detail-label">Hotel Name</span>
+                                <span class="detail-val">{{ h.hotel_name }}</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Holy City</span>
+                                <span class="detail-val">{{ h.city }}</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Group Code</span>
+                                <span class="detail-val">{{ h.group_code }}</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Rooms Allocated</span>
+                                <span class="detail-val">{{ h.rooms_allocated }} Rooms</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Check-In Date</span>
+                                <span class="detail-val">{{ h.check_in_date }}</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Check-Out Date</span>
+                                <span class="detail-val">{{ h.check_out_date }}</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Voucher Status</span>
+                                <span class="detail-val">{{ h.voucher_status }}</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Ground Coordinator</span>
+                                <span class="detail-val">{{ h.assigned_coordinator or 'Unassigned' }}</span>
+                            </div>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <form method="POST" action="{{ url_for('delete_entry', model_type='hotel', item_id=h.id) }}" onsubmit="return confirm('Remove hotel voucher?')">
+                                <button type="submit" class="clay-btn clay-btn-sm" style="color: #dc2626;">
+                                    <i class="fa-solid fa-trash-can"></i> Delete
+                                </button>
+                            </form>
+                            <button type="button" onclick="closeModal('hotelModal{{ h.id }}')" class="clay-btn clay-btn-sm clay-btn-primary">
+                                Close
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div style="padding: 1.75rem 1rem; text-align: center; color: var(--text-muted); font-size: 0.85rem;">
+                No hotel allocations logged yet.
+            </div>
+        {% endif %}
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const permitData = {{ permit_chart_data|safe }};
+    const zyaratData = {{ zyarat_chart_data|safe }};
+    const timelineData = {{ timeline_chart_data|safe }};
+    initCharts(permitData, zyaratData, timelineData);
+});
+</script>
+{% endblock %}

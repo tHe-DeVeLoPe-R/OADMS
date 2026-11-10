@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+
+{% block title %}Zyarat & Group Movement - Urwat il Wusqa DMS{% endblock %}
+
+{% block content %}
+<div class="clay-card" style="margin-bottom: 1.75rem;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 0.75rem;">
+        <div style="display: flex; align-items: center; gap: 0.75rem;">
+            <div class="clay-icon-bubble sky" style="width: 46px; height: 46px; font-size: 1.35rem;">
+                <i class="fa-solid fa-bus-simple"></i>
+            </div>
+            <div>
+                <h1 style="font-size: 1.45rem; font-weight: 800; color: #064e3b;">
+                    Zyarat & Bus Movement Board
+                </h1>
+                <p style="font-size: 0.82rem; color: var(--text-muted); font-weight: 500;">
+                    Reconciliation of booked pilgrims vs. physical bus boarding count.
+                </p>
+            </div>
+        </div>
+
+        {% if session.get('user').role == 'admin' %}
+        <a href="{{ url_for('add_record') }}#zyarat" class="clay-btn clay-btn-primary">
+            <i class="fa-solid fa-circle-plus"></i> Log New Zyarat
+        </a>
+        {% endif %}
+    </div>
+
+    {% if zyarat_list %}
+        <div style="display: flex; flex-direction: column; gap: 1rem;">
+            {% for z in zyarat_list %}
+            <div class="clay-card-flat" style="border-left: 6px solid {% if z.actual_pax < z.booked_pax %}#dc2626{% else %}#059669{% endif %};">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 0.5rem;">
+                    <div>
+                        <span class="status-chip" style="background: #e0f2fe; color: #0369a1; margin-bottom: 4px;">
+                            <i class="fa-solid fa-map-location-dot"></i> {{ z.city }} Zyarat
+                        </span>
+                        <h3 style="font-size: 1.15rem; font-weight: 800; color: #1e293b; margin: 4px 0;">
+                            {{ z.destination }}
+                        </h3>
+                        <div style="font-size: 0.85rem; color: var(--text-muted); font-weight: 500;">
+                            Group: <strong>{{ z.group_code }}</strong> &bull; Date: <strong>{{ z.zyarat_date }}</strong> at <strong>{{ z.departure_time }}</strong>
+                        </div>
+                    </div>
+
+                    <div style="text-align: right;">
+                        {% if z.actual_pax < z.booked_pax %}
+                            <div class="status-chip status-missing">
+                                <i class="fa-solid fa-triangle-exclamation"></i>
+                                {{ z.booked_pax - z.actual_pax }} Pax Missing ({{ z.actual_pax }}/{{ z.booked_pax }} Boarded)
+                            </div>
+                        {% else %}
+                            <div class="status-chip status-confirmed">
+                                <i class="fa-solid fa-circle-check"></i>
+                                Full Attendance ({{ z.actual_pax }}/{{ z.booked_pax }})
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div style="margin-top: 1rem; padding-top: 0.85rem; border-top: 1px dashed #cbd5e1; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.75rem; font-size: 0.88rem;">
+                    <div>
+                        <span style="color: var(--text-muted); font-size: 0.75rem; font-weight: 700; display: block;">ASSIGNED MURSHID</span>
+                        <i class="fa-solid fa-person-chalkboard" style="color: var(--primary);"></i> 
+                        <strong>{{ z.guide_murshid }}</strong>
+                    </div>
+
+                    <div>
+                        <span style="color: var(--text-muted); font-size: 0.75rem; font-weight: 700; display: block;">BUS & DRIVER</span>
+                        <i class="fa-solid fa-van-shuttle"></i> Plate: <strong>{{ z.bus_number or 'Unassigned' }}</strong> &bull; {{ z.driver_name or 'Driver' }}
+                        {% if z.driver_phone %}
+                        <a href="tel:{{ z.driver_phone }}" style="color: var(--primary); margin-left: 6px; text-decoration: none;">
+                            <i class="fa-solid fa-phone"></i> {{ z.driver_phone }}
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Ground Guide Quick Boarding Counter -->
+                <form method="POST" action="{{ url_for('update_zyarat_attendance', zyarat_id=z.id) }}" style="margin-top: 0.85rem; display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+                    <label style="font-size: 0.8rem; font-weight: 700; color: var(--text-secondary);">Boarded Pax:</label>
+                    <input type="number" name="actual_pax" value="{{ z.actual_pax }}" min="0" max="{{ z.booked_pax }}" style="width: 85px;" class="clay-input" style="padding: 0.35rem 0.65rem;">
+                    <button type="submit" class="clay-btn clay-btn-sm clay-btn-primary">
+                        <i class="fa-solid fa-check"></i> Update Boarded
+                    </button>
+                </form>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <!-- Empty State for Zyarat -->
+        <div class="clay-empty-state">
+            <div class="clay-empty-icon">
+                <i class="fa-solid fa-bus-simple" style="color: var(--accent-sky);"></i>
+            </div>
+            <h3 class="clay-empty-title">No Zyarat Excursions Logged Yet</h3>
+            <p class="clay-empty-text">
+                Your database is ready. Add your first Makkah or Madinah Zyarat trip to coordinate bus dispatches and track passenger boarding.
+            </p>
+            {% if session.get('user').role == 'admin' %}
+            <a href="{{ url_for('add_record') }}#zyarat" class="clay-btn clay-btn-primary">
+                <i class="fa-solid fa-plus"></i> Schedule First Zyarat
+            </a>
+            {% endif %}
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

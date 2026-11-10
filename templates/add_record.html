@@ -1,0 +1,739 @@
+{% extends "base.html" %}
+
+{% block title %}Add Operational Record - Urwat il Wusqa DMS{% endblock %}
+
+{% block content %}
+<div style="max-width: 900px; margin: 0 auto;">
+    
+    <!-- Top Action Bar with Prominent Return to Dashboard Button -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 0.75rem;">
+        <a href="{{ url_for('dashboard') }}" class="clay-btn clay-btn-secondary" style="font-weight: 800; font-size: 0.95rem; border: 1.5px solid #cbd5e1;">
+            <i class="fa-solid fa-arrow-left"></i> Return to Dashboard
+        </a>
+
+        <div style="font-size: 0.82rem; color: var(--text-muted); font-weight: 700;">
+            <i class="fa-solid fa-lock" style="color: var(--primary);"></i> Administrator Access Only
+        </div>
+    </div>
+
+    <!-- Page Title -->
+    <div style="margin-bottom: 1.5rem;">
+        <h1 style="font-size: 1.65rem; font-weight: 800; color: #064e3b; display: flex; align-items: center; gap: 0.65rem;">
+            <i class="fa-solid fa-circle-plus" style="color: var(--primary);"></i> Operational Data Entry Center
+        </h1>
+        <p style="font-size: 0.88rem; color: var(--text-muted); font-weight: 500;">
+            Record your group flight logistics, Rawdah permits, Zyarat excursions, and accommodations.
+        </p>
+    </div>
+
+    <!-- Active Group Banner -->
+    {% if selected_group %}
+    <div style="display: flex; align-items: center; gap: 0.65rem; padding: 0.75rem 1.1rem; background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%); border: 1.5px solid #a7f3d0; border-radius: 14px; margin-bottom: 1rem;">
+        <div class="clay-icon-bubble emerald" style="width: 32px; height: 32px; font-size: 0.9rem; flex-shrink: 0;">
+            <i class="fa-solid fa-layer-group"></i>
+        </div>
+        <div>
+            <span style="font-size: 0.72rem; font-weight: 700; color: #047857; text-transform: uppercase;">Adding Data To:</span>
+            <span style="font-size: 0.95rem; font-weight: 800; color: #064e3b; margin-left: 0.4rem;">{{ selected_group.group_code }}</span>
+            <span style="font-size: 0.82rem; color: var(--text-muted); margin-left: 0.3rem;">&mdash; {{ selected_group.group_name }} &bull; {{ selected_group.total_pax }} Pilgrims</span>
+        </div>
+        <a href="{{ url_for('dashboard') }}" style="margin-left: auto; font-size: 0.78rem; color: var(--primary); font-weight: 700; text-decoration: none;">
+            <i class="fa-solid fa-arrow-left"></i> Dashboard
+        </a>
+    </div>
+    {% endif %}
+
+    <!-- Quick Navigation Anchors -->
+    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1.5rem;">
+        <a href="#flight" class="clay-btn clay-btn-sm" style="background: #faf5ff; color: #7e22ce; border: 1px solid #e9d5ff;">
+            <i class="fa-solid fa-plane"></i> 1. Flight Schedule
+        </a>
+        <a href="#group" class="clay-btn clay-btn-sm">
+            <i class="fa-solid fa-users"></i> 2. Pilgrim Group
+        </a>
+        <a href="#permit" class="clay-btn clay-btn-sm" style="background: #fffbeb; color: #b45309; border: 1px solid #fde68a;">
+            <i class="fa-solid fa-kaaba"></i> 3. Riaz Permit
+        </a>
+        <a href="#zyarat" class="clay-btn clay-btn-sm">
+            <i class="fa-solid fa-bus"></i> 4. Zyarat Trip
+        </a>
+        <a href="#hotel" class="clay-btn clay-btn-sm">
+            <i class="fa-solid fa-hotel"></i> 5. Hotel Voucher
+        </a>
+        <a href="#incident" class="clay-btn clay-btn-sm" style="color: #dc2626;">
+            <i class="fa-solid fa-triangle-exclamation"></i> 6. Incident Alert
+        </a>
+        <a href="#pilgrim" class="clay-btn clay-btn-sm" style="background: #f0fdf4; color: #047857; border: 1px solid #a7f3d0;">
+            <i class="fa-solid fa-user-plus"></i> 7. Add Pilgrim
+        </a>
+    </div>
+
+    <!-- ===================================================================== -->
+    <!-- SECTION 1: ✈️ GROUP FLIGHT SCHEDULE & LOGISTICS                        -->
+    <!-- ===================================================================== -->
+    <div class="clay-card" style="margin-bottom: 1.75rem;" id="flight">
+        <div style="display: flex; align-items: center; gap: 0.65rem; margin-bottom: 1.25rem;">
+            <div class="clay-icon-bubble purple" style="width: 44px; height: 44px; font-size: 1.25rem;">
+                <i class="fa-solid fa-plane-arrival"></i>
+            </div>
+            <div>
+                <h2 style="font-size: 1.25rem; font-weight: 800; color: #064e3b;">
+                    1. Group Flight Schedule & Logistics
+                </h2>
+                <div style="font-size: 0.8rem; color: var(--text-muted);">Record arrival/departure flights, dates, times, and airport transport.</div>
+            </div>
+        </div>
+
+        <form method="POST" action="{{ url_for('create_flight') }}">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; margin-bottom: 1rem;">
+                <div class="clay-input-group">
+                    <label class="clay-input-label">
+                        <i class="fa-solid fa-layer-group" style="color: var(--primary);"></i> Pilgrim Group Code *
+                    </label>
+                    <select name="group_code" class="clay-select" required>
+                        {% if groups %}
+                            {% for g in groups %}
+                                <option value="{{ g.group_code }}" {% if g.group_code == selected_group_code %}selected{% endif %}>{{ g.group_code }} - {{ g.group_name }}</option>
+                            {% endfor %}
+                        {% else %}
+                            <option value="GROUP 26 NOV">GROUP 26 NOV</option>
+                        {% endif %}
+                    </select>
+                </div>
+
+                <div class="clay-input-group">
+                    <label class="clay-input-label">
+                        <i class="fa-solid fa-plane" style="color: #7e22ce;"></i> Flight Number *
+                    </label>
+                    <input type="text" name="flight_number" required placeholder="e.g. SV-739 / PA-470 / PK-741" class="clay-input" style="text-transform: uppercase;">
+                </div>
+
+                <div class="clay-input-group">
+                    <label class="clay-input-label">
+                        <i class="fa-solid fa-ticket" style="color: #7e22ce;"></i> Airline Name
+                    </label>
+                    <input type="text" name="airline" placeholder="e.g. Saudia, Airblue, PIA, Flynas" class="clay-input">
+                </div>
+
+                <div class="clay-input-group">
+                    <label class="clay-input-label">
+                        <i class="fa-solid fa-arrows-left-right" style="color: var(--primary);"></i> Route Movement *
+                    </label>
+                    <select name="route_type" class="clay-select" required>
+                        <option value="Arrival">Arrival (Airport Pickup to Hotel)</option>
+                        <option value="Departure">Departure (Hotel Dropoff to Airport)</option>
+                    </select>
+                </div>
+
+                <div class="clay-input-group">
+                    <label class="clay-input-label">
+                        <i class="fa-solid fa-plane-up" style="color: var(--primary);"></i> Saudi Airport *
+                    </label>
+                    <select name="airport" class="clay-select" required>
+                        <option value="Jeddah (JED)">Jeddah King Abdulaziz Intl (JED)</option>
+                        <option value="Madinah (MED)">Madinah Prince Mohammad Intl (MED)</option>
+                    </select>
+                </div>
+
+                <div class="clay-input-group">
+                    <label class="clay-input-label">
+                        <i class="fa-solid fa-calendar-day" style="color: var(--primary);"></i> Flight Date *
+                    </label>
+                    <input type="date" name="flight_date" required class="clay-input">
+                </div>
+
+                <div class="clay-input-group">
+                    <label class="clay-input-label">
+                        <i class="fa-solid fa-clock" style="color: var(--primary);"></i> Flight Time (Arrival/Departure) *
+                    </label>
+                    <input type="text" name="flight_time" required placeholder="e.g. 02:45 PM or 14:45" class="clay-input">
+                </div>
+
+                <div class="clay-input-group">
+                    <label class="clay-input-label">
+                        <i class="fa-solid fa-users" style="color: var(--primary);"></i> Passenger Count (Pax) *
+                    </label>
+                    <input type="number" name="pax_count" required min="1" placeholder="e.g. 45" class="clay-input">
+                </div>
+
+                <div class="clay-input-group">
+                    <label class="clay-input-label">
+                        <i class="fa-solid fa-van-shuttle" style="color: var(--primary);"></i> Transport Assigned
+                    </label>
+                    <input type="text" name="transport_assigned" placeholder="e.g. 1x 50-Seater SAPTCO Bus" class="clay-input">
+                </div>
+
+                <div class="clay-input-group">
+                    <label class="clay-input-label">
+                        <i class="fa-solid fa-info-circle" style="color: var(--primary);"></i> Flight Status
+                    </label>
+                    <select name="status" class="clay-select">
+                        <option value="Scheduled">Scheduled</option>
+                        <option value="On Time">On Time</option>
+                        <option value="Delayed">Delayed</option>
+                        <option value="Landed">Landed / Completed</option>
+                    </select>
+                </div>
+            </div>
+
+            <button type="submit" class="clay-btn clay-btn-primary" style="width: 100%;">
+                <i class="fa-solid fa-check-circle"></i> Save Flight Schedule
+            </button>
+        </form>
+    </div>
+
+    <!-- ===================================================================== -->
+    <!-- SECTION 2: 👥 PILGRIM GROUP CREATION                                   -->
+    <!-- ===================================================================== -->
+    <div class="clay-card" style="margin-bottom: 1.75rem;" id="group">
+        <div style="display: flex; align-items: center; gap: 0.65rem; margin-bottom: 1.25rem;">
+            <div class="clay-icon-bubble emerald" style="width: 44px; height: 44px; font-size: 1.25rem;">
+                <i class="fa-solid fa-users-rectangle"></i>
+            </div>
+            <div>
+                <h2 style="font-size: 1.25rem; font-weight: 800; color: #064e3b;">
+                    2. Create Pilgrim Group
+                </h2>
+                <div style="font-size: 0.8rem; color: var(--text-muted);">Defines the package code, leader, total pilgrims, and trip dates.</div>
+            </div>
+        </div>
+
+        <form method="POST" action="{{ url_for('create_group') }}">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; margin-bottom: 1rem;">
+                <div class="clay-input-group">
+                    <label class="clay-input-label">
+                        <i class="fa-solid fa-barcode" style="color: var(--primary);"></i> Group Code (Unique) *
+                    </label>
+                    <input type="text" name="group_code" required placeholder="e.g. GROUP 26 NOV" class="clay-input" style="text-transform: uppercase;">
+                </div>
+
+                <div class="clay-input-group">
+                    <label class="clay-input-label">
+                        <i class="fa-solid fa-tag" style="color: var(--primary);"></i> Group Package Name *
+                    </label>
+                    <input type="text" name="group_name" required placeholder="e.g. 15-Day Star Umrah" class="clay-input">
+                </div>
+
+                <div class="clay-input-group">
+                    <label class="clay-input-label">
+                        <i class="fa-solid fa-users" style="color: var(--primary);"></i> Total Pilgrims (Pax) *
+                    </label>
+                    <input type="number" name="total_pax" required min="1" placeholder="e.g. 45" class="clay-input">
+                </div>
+
+                <div class="clay-input-group">
+                    <label class="clay-input-label">
+                        <i class="fa-solid fa-user-tie" style="color: var(--primary);"></i> Group Leader Name
+                    </label>
+                    <input type="text" name="leader_name" placeholder="e.g. Haji Bashir Ahmad" class="clay-input">
+                </div>
+
+                <div class="clay-input-group">
+                    <label class="clay-input-label">
+                        <i class="fa-brands fa-whatsapp" style="color: #25d366;"></i> Leader WhatsApp Number
+                    </label>
+                    <input type="text" name="leader_phone" placeholder="+92 300 1234567" class="clay-input">
+                </div>
+
+                <div class="clay-input-group">
+                    <label class="clay-input-label">
+                        <i class="fa-solid fa-plane-arrival" style="color: var(--primary);"></i> Arrival Date in KSA
+                    </label>
+                    <input type="date" name="arrival_date" class="clay-input">
+                </div>
+
+                <div class="clay-input-group">
+                    <label class="clay-input-label">
+                        <i class="fa-solid fa-plane-departure" style="color: var(--primary);"></i> Departure Date from KSA
+                    </label>
+                    <input type="date" name="departure_date" class="clay-input">
+                </div>
+            </div>
+
+            <button type="submit" class="clay-btn clay-btn-primary" style="width: 100%;">
+                <i class="fa-solid fa-check-circle"></i> Save Pilgrim Group
+            </button>
+        </form>
+    </div>
+
+    <!-- ===================================================================== -->
+    <!-- SECTION 3: 🕌 RIAZ UL JANNAH PERMIT (EXACT FIELDS REQUESTED)          -->
+    <!-- ===================================================================== -->
+    <div class="clay-card" style="margin-bottom: 1.75rem;" id="permit">
+        <div style="display: flex; align-items: center; gap: 0.65rem; margin-bottom: 1.25rem;">
+            <div class="clay-icon-bubble gold" style="width: 44px; height: 44px; font-size: 1.25rem;">
+                <i class="fa-solid fa-kaaba"></i>
+            </div>
+            <div>
+                <h2 style="font-size: 1.25rem; font-weight: 800; color: #064e3b;">
+                    3. Add Riaz Ul Jannah Permit
+                </h2>
+                <div style="font-size: 0.8rem; color: var(--text-muted);">
+                    Passport, Visa, Pilgrim WhatsApp, Date, Time, Status, and Permit Type.
+                </div>
+            </div>
+        </div>
+
+        <form method="POST" action="{{ url_for('create_permit') }}">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; margin-bottom: 1.25rem;">
+
+                <!-- 0. Group Code (from active selection) -->
+                <div class="clay-input-group">
+                    <label class="clay-input-label">
+                        <i class="fa-solid fa-layer-group" style="color: var(--primary);"></i> Pilgrim Group *
+                    </label>
+                    <select name="group_code" class="clay-select" required>
+                        {% if groups %}
+                            {% for g in groups %}
+                                <option value="{{ g.group_code }}" {% if g.group_code == selected_group_code %}selected{% endif %}>{{ g.group_code }} - {{ g.group_name }}</option>
+                            {% endfor %}
+                        {% else %}
+                            <option value="">No Group — Create One First</option>
+                        {% endif %}
+                    </select>
+                </div>
+
+                <!-- 1. Passport Number -->
+                <div class="clay-input-group">
+                    <label class="clay-input-label">
+                        <i class="fa-solid fa-passport" style="color: var(--primary);"></i> Passport Number *
+                    </label>
+                    <input type="text" name="passport_number" required placeholder="e.g. PK1234567" class="clay-input" style="text-transform: uppercase;">
+                </div>
+
+                <!-- 2. Visa Number -->
+                <div class="clay-input-group">
+                    <label class="clay-input-label">
+                        <i class="fa-solid fa-stamp" style="color: var(--accent-sky);"></i> Visa Number *
+                    </label>
+                    <input type="text" name="visa_number" required placeholder="e.g. 6089123456" class="clay-input" style="text-transform: uppercase;">
+                </div>
+
+                <!-- 3. Pilgrim WhatsApp -->
+                <div class="clay-input-group">
+                    <label class="clay-input-label">
+                        <i class="fa-brands fa-whatsapp" style="color: #25d366;"></i> Pilgrim WhatsApp Number *
+                    </label>
+                    <input type="text" name="pilgrim_whatsapp" required placeholder="e.g. +923001234567" class="clay-input">
+                </div>
+
+                <!-- 4. Permit Date -->
+                <div class="clay-input-group">
+                    <label class="clay-input-label">
+                        <i class="fa-solid fa-calendar-day" style="color: var(--primary);"></i> Permit Date *
+                    </label>
+                    <input type="date" name="permit_date" required class="clay-input">
+                </div>
+
+                <!-- 5. Time (Slot Time Window) -->
+                <div class="clay-input-group">
+                    <label class="clay-input-label">
+                        <i class="fa-solid fa-clock" style="color: var(--primary);"></i> Slot Time Window *
+                    </label>
+                    <input type="text" name="slot_time" required placeholder="e.g. 02:00 AM - 02:30 AM" class="clay-input">
+                </div>
+
+                <!-- 6. Status (Upcoming, Completed, Missed) -->
+                <div class="clay-input-group">
+                    <label class="clay-input-label">
+                        <i class="fa-solid fa-list-check" style="color: var(--primary);"></i> Permit Status *
+                    </label>
+                    <select name="status" class="clay-select" required>
+                        <option value="Upcoming" selected>Upcoming</option>
+                        <option value="Completed">Completed</option>
+                        <option value="Missed">Missed</option>
+                    </select>
+                </div>
+
+                <!-- 7. Permit Type (Own Permit, Managed on Wheel Chair, Managed by Cash) -->
+                <div class="clay-input-group">
+                    <label class="clay-input-label">
+                        <i class="fa-solid fa-hand-holding-hand" style="color: var(--accent-gold);"></i> Permit Type *
+                    </label>
+                    <select name="permit_type" class="clay-select" required>
+                        <option value="Own Permit" selected>Own Permit</option>
+                        <option value="Managed on Wheel Chair">Managed on Wheel Chair</option>
+                        <option value="Managed by Cash">Managed by Cash</option>
+                    </select>
+                </div>
+
+            </div>
+
+            <button type="submit" class="clay-btn clay-btn-primary" style="width: 100%;">
+                <i class="fa-solid fa-check-circle"></i> Save Riaz Ul Jannah Permit
+            </button>
+        </form>
+    </div>
+
+    <!-- ===================================================================== -->
+    <!-- SECTION 4: 🚌 ZYARAT & BUS ATTENDANCE DISPATCH                         -->
+    <!-- ===================================================================== -->
+    <div class="clay-card" style="margin-bottom: 1.75rem;" id="zyarat">
+        <div style="display: flex; align-items: center; gap: 0.65rem; margin-bottom: 1.25rem;">
+            <div class="clay-icon-bubble sky" style="width: 44px; height: 44px; font-size: 1.25rem;">
+                <i class="fa-solid fa-bus-simple"></i>
+            </div>
+            <div>
+                <h2 style="font-size: 1.25rem; font-weight: 800; color: #064e3b;">
+                    4. Log Zyarat & Bus Attendance Trip
+                </h2>
+                <div style="font-size: 0.8rem; color: var(--text-muted);">Record Makkah or Madinah tours, bus number, and attendance quota.</div>
+            </div>
+        </div>
+
+        <form method="POST" action="{{ url_for('create_zyarat') }}">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; margin-bottom: 1rem;">
+                <div class="clay-input-group">
+                    <label class="clay-input-label">
+                        <i class="fa-solid fa-city" style="color: var(--primary);"></i> Holy City *
+                    </label>
+                    <select name="city" class="clay-select" required>
+                        <option value="Madinah">Madinah Munawwarah</option>
+                        <option value="Makkah">Makkah Mukarramah</option>
+                    </select>
+                </div>
+
+                <div class="clay-input-group">
+                    <label class="clay-input-label">
+                        <i class="fa-solid fa-layer-group" style="color: var(--primary);"></i> Group Code *
+                    </label>
+                    <select name="group_code" class="clay-select" required>
+                        {% if groups %}
+                            {% for g in groups %}
+                                <option value="{{ g.group_code }}" {% if g.group_code == selected_group_code %}selected{% endif %}>{{ g.group_code }} - {{ g.group_name }}</option>
+                            {% endfor %}
+                        {% else %}
+                            <option value="GROUP 26 NOV">GROUP 26 NOV</option>
+                        {% endif %}
+                    </select>
+                </div>
+
+                <div class="clay-input-group">
+                    <label class="clay-input-label">
+                        <i class="fa-solid fa-map-pin" style="color: var(--primary);"></i> Destination / Route *
+                    </label>
+                    <input type="text" name="destination" required placeholder="e.g. MADINA PAK HARAM TO HARAM" class="clay-input">
+                </div>
+
+                <div class="clay-input-group">
+                    <label class="clay-input-label">
+                        <i class="fa-solid fa-calendar-day" style="color: var(--primary);"></i> Zyarat Date *
+                    </label>
+                    <input type="date" name="zyarat_date" required class="clay-input">
+                </div>
+
+                <div class="clay-input-group">
+                    <label class="clay-input-label">
+                        <i class="fa-solid fa-clock" style="color: var(--primary);"></i> Departure Time *
+                    </label>
+                    <input type="text" name="departure_time" required placeholder="e.g. 07:30 AM" class="clay-input">
+                </div>
+
+                <div class="clay-input-group">
+                    <label class="clay-input-label">
+                        <i class="fa-solid fa-van-shuttle" style="color: var(--primary);"></i> Bus Number Plate
+                    </label>
+                    <input type="text" name="bus_number" placeholder="e.g. KSA-4912" class="clay-input">
+                </div>
+
+                <div class="clay-input-group">
+                    <label class="clay-input-label">
+                        <i class="fa-solid fa-id-card" style="color: var(--primary);"></i> Driver Name & Phone
+                    </label>
+                    <input type="text" name="driver_name" placeholder="Driver Name" class="clay-input" style="margin-bottom: 0.4rem;">
+                    <input type="text" name="driver_phone" placeholder="+966 5x xxx xxxx" class="clay-input">
+                </div>
+
+                <div class="clay-input-group">
+                    <label class="clay-input-label">
+                        <i class="fa-solid fa-person-chalkboard" style="color: var(--primary);"></i> Assigned Murshid *
+                    </label>
+                    <input type="text" name="guide_murshid" required placeholder="e.g. MEHBOOB BHAI" class="clay-input">
+                </div>
+
+                <div class="clay-input-group">
+                    <label class="clay-input-label">
+                        <i class="fa-solid fa-users" style="color: var(--primary);"></i> Booked Pax (Expected) *
+                    </label>
+                    <input type="number" id="booked_pax" name="booked_pax" required min="1" value="23" class="clay-input">
+                </div>
+
+                <div class="clay-input-group">
+                    <label class="clay-input-label">
+                        <i class="fa-solid fa-user-check" style="color: var(--primary);"></i> Boarded Pax (Actual) *
+                    </label>
+                    <input type="number" id="actual_pax" name="actual_pax" required min="0" value="26" class="clay-input">
+                </div>
+
+                <div class="clay-input-group">
+                    <label class="clay-input-label">
+                        <i class="fa-solid fa-signal" style="color: var(--primary);"></i> Trip Status
+                    </label>
+                    <select name="status" class="clay-select">
+                        <option value="Scheduled">Scheduled</option>
+                        <option value="Boarding" selected>Boarding</option>
+                        <option value="In Transit">In Transit</option>
+                        <option value="Completed">Completed</option>
+                    </select>
+                </div>
+            </div>
+
+            <button type="submit" class="clay-btn clay-btn-primary" style="width: 100%;">
+                <i class="fa-solid fa-check-circle"></i> Save Zyarat Trip
+            </button>
+        </form>
+    </div>
+
+    <!-- ===================================================================== -->
+    <!-- SECTION 5: 🏨 HOTEL ACCOMMODATION VOUCHER                             -->
+    <!-- ===================================================================== -->
+    <div class="clay-card" style="margin-bottom: 1.75rem;" id="hotel">
+        <div style="display: flex; align-items: center; gap: 0.65rem; margin-bottom: 1.25rem;">
+            <div class="clay-icon-bubble emerald" style="width: 44px; height: 44px; font-size: 1.25rem;">
+                <i class="fa-solid fa-hotel"></i>
+            </div>
+            <div>
+                <h2 style="font-size: 1.25rem; font-weight: 800; color: #064e3b;">
+                    5. Log Hotel Accommodation Voucher
+                </h2>
+                <div style="font-size: 0.8rem; color: var(--text-muted);">Manage room allocations, check-in/out dates, and hotel names.</div>
+            </div>
+        </div>
+
+        <form method="POST" action="{{ url_for('create_hotel') }}">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; margin-bottom: 1rem;">
+                <div class="clay-input-group">
+                    <label class="clay-input-label">
+                        <i class="fa-solid fa-city" style="color: var(--primary);"></i> City *
+                    </label>
+                    <select name="city" class="clay-select" required>
+                        <option value="Madinah">Madinah Munawwarah</option>
+                        <option value="Makkah">Makkah Mukarramah</option>
+                    </select>
+                </div>
+
+                <div class="clay-input-group">
+                    <label class="clay-input-label">
+                        <i class="fa-solid fa-building" style="color: var(--primary);"></i> Hotel Name *
+                    </label>
+                    <input type="text" name="hotel_name" required placeholder="e.g. Dallah Taibah / Pullman Zamzam" class="clay-input">
+                </div>
+
+                <div class="clay-input-group">
+                    <label class="clay-input-label">
+                        <i class="fa-solid fa-layer-group" style="color: var(--primary);"></i> Group Code *
+                    </label>
+                    <select name="group_code" class="clay-select" required>
+                        {% if groups %}
+                            {% for g in groups %}
+                                <option value="{{ g.group_code }}" {% if g.group_code == selected_group_code %}selected{% endif %}>{{ g.group_code }} - {{ g.group_name }}</option>
+                            {% endfor %}
+                        {% else %}
+                            <option value="GROUP 26 NOV">GROUP 26 NOV</option>
+                        {% endif %}
+                    </select>
+                </div>
+
+                <div class="clay-input-group">
+                    <label class="clay-input-label">
+                        <i class="fa-solid fa-door-open" style="color: var(--primary);"></i> Rooms Allocated *
+                    </label>
+                    <input type="number" name="rooms_allocated" required min="1" placeholder="e.g. 15" class="clay-input">
+                </div>
+
+                <div class="clay-input-group">
+                    <label class="clay-input-label">
+                        <i class="fa-solid fa-calendar-plus" style="color: var(--primary);"></i> Check-In Date *
+                    </label>
+                    <input type="date" name="check_in_date" required class="clay-input">
+                </div>
+
+                <div class="clay-input-group">
+                    <label class="clay-input-label">
+                        <i class="fa-solid fa-calendar-minus" style="color: var(--primary);"></i> Check-Out Date *
+                    </label>
+                    <input type="date" name="check_out_date" required class="clay-input">
+                </div>
+
+                <div class="clay-input-group">
+                    <label class="clay-input-label">
+                        <i class="fa-solid fa-receipt" style="color: var(--primary);"></i> Voucher Status
+                    </label>
+                    <select name="voucher_status" class="clay-select">
+                        <option value="Confirmed">Confirmed</option>
+                        <option value="Pending">Pending Voucher</option>
+                    </select>
+                </div>
+
+                <div class="clay-input-group">
+                    <label class="clay-input-label">
+                        <i class="fa-solid fa-user-shield" style="color: var(--primary);"></i> Ground Coordinator
+                    </label>
+                    <input type="text" name="assigned_coordinator" placeholder="e.g. Hafiz Bilal (+966 5x)" class="clay-input">
+                </div>
+            </div>
+
+            <button type="submit" class="clay-btn clay-btn-primary" style="width: 100%;">
+                <i class="fa-solid fa-check-circle"></i> Save Hotel Voucher
+            </button>
+        </form>
+    </div>
+
+    <!-- ===================================================================== -->
+    <!-- SECTION 6: ⚠️ GROUND INCIDENT / ALERT                                  -->
+    <!-- ===================================================================== -->
+    <div class="clay-card" style="margin-bottom: 2rem;" id="incident">
+        <div style="display: flex; align-items: center; gap: 0.65rem; margin-bottom: 1.25rem;">
+            <div class="clay-icon-bubble coral" style="width: 44px; height: 44px; font-size: 1.25rem;">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <div>
+                <h2 style="font-size: 1.25rem; font-weight: 800; color: #dc2626;">
+                    6. Log Ground Incident / Alert
+                </h2>
+                <div style="font-size: 0.8rem; color: var(--text-muted);">Broadcast critical alerts (medical, lost bags, permit delays).</div>
+            </div>
+        </div>
+
+        <form method="POST" action="{{ url_for('create_incident') }}">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; margin-bottom: 1rem;">
+                <div class="clay-input-group">
+                    <label class="clay-input-label">
+                        <i class="fa-solid fa-shield-virus" style="color: #dc2626;"></i> Severity Level *
+                    </label>
+                    <select name="severity" class="clay-select" required>
+                        <option value="Critical">Critical (Immediate Escalation)</option>
+                        <option value="High">High (Flight / Permit Risk)</option>
+                        <option value="Medium">Medium (Attendance / Luggage)</option>
+                        <option value="Low">Low (General Notice)</option>
+                    </select>
+                </div>
+
+                <div class="clay-input-group">
+                    <label class="clay-input-label">
+                        <i class="fa-solid fa-circle-exclamation" style="color: #dc2626;"></i> Incident Category *
+                    </label>
+                    <input type="text" name="category" required placeholder="e.g. Permit Delay, Medical, Lost Bag" class="clay-input">
+                </div>
+
+                <div class="clay-input-group">
+                    <label class="clay-input-label">
+                        <i class="fa-solid fa-layer-group" style="color: #dc2626;"></i> Affected Group
+                    </label>
+                    <select name="group_code" class="clay-select">
+                        <option value="">General / All Groups</option>
+                        {% for g in groups %}
+                            <option value="{{ g.group_code }}">{{ g.group_code }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <div class="clay-input-group" style="margin-bottom: 1.25rem;">
+                <label class="clay-input-label">
+                    <i class="fa-solid fa-comment-dots" style="color: #dc2626;"></i> Description & Action Needed *
+                </label>
+                <textarea name="description" required rows="3" placeholder="Describe the incident, pilgrim details, and action required..." class="clay-textarea"></textarea>
+            </div>
+
+            <button type="submit" class="clay-btn clay-btn-danger" style="width: 100%;">
+                <i class="fa-solid fa-triangle-exclamation"></i> Submit Ground Alert
+            </button>
+        </form>
+    </div>
+
+
+    <!-- ===================================================================== -->
+    <!-- SECTION 7: 👤 PILGRIM DETAILS                                         -->
+    <!-- ===================================================================== -->
+    <div class="clay-card" style="margin-bottom: 1.75rem;" id="pilgrim">
+        <div style="display: flex; align-items: center; gap: 0.65rem; margin-bottom: 1.25rem;">
+            <div class="clay-icon-bubble emerald" style="width: 44px; height: 44px; font-size: 1.25rem;">
+                <i class="fa-solid fa-user-plus"></i>
+            </div>
+            <div>
+                <h2 style="font-size: 1.25rem; font-weight: 800; color: #064e3b;">
+                    7. Add Pilgrim to Group
+                </h2>
+                <div style="font-size: 0.8rem; color: var(--text-muted);">Name, Reference, Passport, Contact and Address. Each entry per pilgrim.</div>
+            </div>
+        </div>
+
+        <form method="POST" action="{{ url_for('create_pilgrim') }}">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; margin-bottom: 1rem;">
+
+                <!-- Group Code -->
+                <div class="clay-input-group">
+                    <label class="clay-input-label">
+                        <i class="fa-solid fa-layer-group" style="color: var(--primary);"></i> Pilgrim Group *
+                    </label>
+                    <select name="group_code" class="clay-select" required>
+                        {% if groups %}
+                            {% for g in groups %}
+                                <option value="{{ g.group_code }}" {% if g.group_code == selected_group_code %}selected{% endif %}>
+                                    {{ g.group_code }} - {{ g.group_name }}
+                                </option>
+                            {% endfor %}
+                        {% else %}
+                            <option value="">No Group — Create One First</option>
+                        {% endif %}
+                    </select>
+                </div>
+
+                <!-- Pilgrim Name -->
+                <div class="clay-input-group">
+                    <label class="clay-input-label">
+                        <i class="fa-solid fa-user" style="color: var(--primary);"></i> Full Name *
+                    </label>
+                    <input type="text" name="name" required placeholder="e.g. Muhammad Arshad" class="clay-input">
+                </div>
+
+                <!-- Passport Number -->
+                <div class="clay-input-group">
+                    <label class="clay-input-label">
+                        <i class="fa-solid fa-passport" style="color: var(--primary);"></i> Passport Number
+                    </label>
+                    <input type="text" name="passport_number" placeholder="e.g. AB1234567" class="clay-input" style="text-transform: uppercase;">
+                </div>
+
+                <!-- Reference By -->
+                <div class="clay-input-group">
+                    <label class="clay-input-label">
+                        <i class="fa-solid fa-handshake" style="color: var(--primary);"></i> Reference By
+                    </label>
+                    <input type="text" name="reference_by" placeholder="e.g. Haji Bashir / Self" class="clay-input">
+                </div>
+
+                <!-- Contact -->
+                <div class="clay-input-group">
+                    <label class="clay-input-label">
+                        <i class="fa-brands fa-whatsapp" style="color: #25d366;"></i> Pilgrim WhatsApp Number *
+                    </label>
+                    <input type="text" name="contact" placeholder="e.g. +92 300 1234567" class="clay-input">
+                </div>
+
+                <!-- Address -->
+                <div class="clay-input-group">
+                    <label class="clay-input-label">
+                        <i class="fa-solid fa-location-dot" style="color: var(--primary);"></i> Home Address
+                    </label>
+                    <input type="text" name="address" placeholder="e.g. House 5, Block B, Lahore" class="clay-input">
+                </div>
+
+            </div>
+
+            <button type="submit" class="clay-btn clay-btn-primary" style="width: 100%;">
+                <i class="fa-solid fa-user-plus"></i> Add Pilgrim to Group
+            </button>
+        </form>
+    </div>
+
+    <!-- Bottom Return to Dashboard Button -->
+    <div style="text-align: center; margin-bottom: 3rem;">
+        <a href="{{ url_for('dashboard') }}" class="clay-btn clay-btn-secondary" style="font-weight: 800; font-size: 1rem; padding: 0.85rem 2rem; border: 1.5px solid #cbd5e1;">
+            <i class="fa-solid fa-arrow-left"></i> Return to Operations Dashboard
+        </a>
+    </div>
+
+</div>
+{% endblock %}
