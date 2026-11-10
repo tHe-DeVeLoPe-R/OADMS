@@ -4,6 +4,128 @@
  */
 
 // ----------------------------------------------------------------------------
+// Global Loading States & Page Transitions
+// ----------------------------------------------------------------------------
+const PageLoader = {
+    progressBar: null,
+    overlayLoader: null,
+    progressInterval: null,
+    currentProgress: 0,
+
+    init() {
+        this.progressBar = document.getElementById('globalProgressBar');
+        this.overlayLoader = document.getElementById('globalPageLoader');
+
+        // Initial page load progress completion
+        this.start();
+        window.addEventListener('load', () => {
+            this.complete();
+        });
+
+        // Intercept standard internal links for smooth loading feel
+        document.addEventListener('click', (e) => {
+            const link = e.target.closest('a');
+            if (!link) return;
+
+            const href = link.getAttribute('href');
+            const target = link.getAttribute('target');
+
+            // Exclude empty anchors, hash jumps, JS voids, downloads, external tabs
+            if (!href || href.startsWith('#') || href.startsWith('javascript:') || target === '_blank') {
+                return;
+            }
+
+            // If navigating within the same origin, trigger progress & optional overlay
+            if (link.hostname === window.location.hostname) {
+                this.start();
+                // If it's a major navigation (e.g., voucher, add record, logout)
+                if (href.includes('/voucher/') || href.includes('/add_record') || href.includes('/login')) {
+                    this.showOverlay('Loading document...');
+                }
+            }
+        });
+
+        // Intercept form submissions (e.g. creating pilgrim, add flight/hotel)
+        document.addEventListener('submit', (e) => {
+            const form = e.target;
+            const submitBtn = form.querySelector('button[type="submit"], input[type="submit"]');
+            if (submitBtn) {
+                submitBtn.classList.add('btn-loading');
+                if (submitBtn.tagName === 'BUTTON') {
+                    const originalText = submitBtn.innerHTML;
+                    submitBtn.dataset.originalText = originalText;
+                    submitBtn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> Saving...`;
+                }
+            }
+            this.start();
+            this.showOverlay('Saving & Updating Records...');
+        });
+
+        // Handle browser back/forward cache (pageshow)
+        window.addEventListener('pageshow', (event) => {
+            this.complete();
+            this.hideOverlay();
+            document.querySelectorAll('.btn-loading').forEach(btn => {
+                btn.classList.remove('btn-loading');
+                if (btn.dataset.originalText) {
+                    btn.innerHTML = btn.dataset.originalText;
+                }
+            });
+        });
+    },
+
+    start() {
+        if (!this.progressBar) return;
+        clearInterval(this.progressInterval);
+        this.currentProgress = 15;
+        this.progressBar.style.opacity = '1';
+        this.progressBar.style.width = this.currentProgress + '%';
+
+        // Incrementally advance progress to simulate activity
+        this.progressInterval = setInterval(() => {
+            if (this.currentProgress < 85) {
+                this.currentProgress += Math.random() * 12;
+                if (this.currentProgress > 85) this.currentProgress = 85;
+                this.progressBar.style.width = this.currentProgress + '%';
+            }
+        }, 180);
+    },
+
+    complete() {
+        if (!this.progressBar) return;
+        clearInterval(this.progressInterval);
+        this.progressBar.style.width = '100%';
+        setTimeout(() => {
+            this.progressBar.style.opacity = '0';
+            setTimeout(() => {
+                this.progressBar.style.width = '0%';
+                this.currentProgress = 0;
+            }, 300);
+        }, 200);
+        this.hideOverlay();
+    },
+
+    showOverlay(text) {
+        if (!this.overlayLoader) return;
+        const sub = this.overlayLoader.querySelector('.loader-sub');
+        if (sub && text) {
+            sub.textContent = text;
+        }
+        this.overlayLoader.classList.add('active');
+    },
+
+    hideOverlay() {
+        if (!this.overlayLoader) return;
+        this.overlayLoader.classList.remove('active');
+    }
+};
+
+// Initialize PageLoader once DOM is ready
+document.addEventListener('DOMContentLoaded', () => {
+    PageLoader.init();
+});
+
+// ----------------------------------------------------------------------------
 // Claymorphic Modal / Popup Helpers
 // ----------------------------------------------------------------------------
 function openModal(modalId) {

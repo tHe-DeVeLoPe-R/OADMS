@@ -666,6 +666,21 @@
             }
         }
 
+        /* ---- PROGRESS BAR (TOP) ---- */
+        #voucherProgressBar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 3.5px;
+            width: 0%;
+            background: linear-gradient(90deg, #059669 0%, #10b981 50%, #d97706 100%);
+            z-index: 999999;
+            transition: width 0.25s ease, opacity 0.4s ease;
+            box-shadow: 0 0 10px rgba(16, 185, 129, 0.8), 0 0 4px #059669;
+            pointer-events: none;
+            opacity: 0;
+        }
+
         /* ---- PRINT STYLES ---- */
         @media print {
             body {
@@ -696,6 +711,9 @@
 </head>
 
 <body>
+    <!-- Top Progress Loading Indicator -->
+    <div id="voucherProgressBar"></div>
+
     <div class="voucher-wrap">
 
         <!-- Top Action Bar (Hidden when printing) -->
@@ -1095,6 +1113,22 @@
                 btn.style.background = '#047857';
             }
         }
+
+        // Progress Bar on Voucher page load
+        (function() {
+            const bar = document.getElementById('voucherProgressBar');
+            if (!bar) return;
+            bar.style.opacity = '1';
+            bar.style.width = '35%';
+            setTimeout(() => { bar.style.width = '75%'; }, 100);
+            window.addEventListener('load', () => {
+                bar.style.width = '100%';
+                setTimeout(() => {
+                    bar.style.opacity = '0';
+                    setTimeout(() => { bar.style.width = '0%'; }, 300);
+                }, 200);
+            });
+        })();
 
         // Automatically generate QR code when page loads so it is ready right away for printing
         document.addEventListener('DOMContentLoaded', () => {
