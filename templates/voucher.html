@@ -510,6 +510,162 @@
             font-size: 1.1rem;
         }
 
+        /* ---- RESPONSIVE MEDIA QUERIES ---- */
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem 0.5rem;
+            }
+
+            .action-bar {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 0.65rem;
+                margin-bottom: 1rem;
+            }
+
+            .portal-badge {
+                justify-content: center;
+                font-size: 0.78rem;
+                padding: 0.5rem 0.9rem;
+            }
+
+            .action-buttons {
+                justify-content: stretch;
+                display: grid;
+                grid-template-columns: 1fr;
+                gap: 0.5rem;
+            }
+
+            .btn {
+                justify-content: center;
+                width: 100%;
+                font-size: 0.82rem;
+                padding: 0.65rem 1rem;
+            }
+
+            .voucher-header {
+                padding: 1.5rem 1.15rem 1.25rem;
+            }
+
+            .voucher-header::before {
+                display: none;
+            }
+
+            .voucher-header > div:first-child {
+                flex-direction: column-reverse;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+
+            .company-name {
+                font-size: 1.5rem;
+            }
+
+            .company-lic {
+                font-size: 0.8rem;
+            }
+
+            .header-group-info {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 0.75rem;
+                margin-top: 1.25rem;
+                padding-top: 1.1rem;
+            }
+
+            .hgi-item label {
+                font-size: 0.68rem;
+            }
+
+            .hgi-val {
+                font-size: 0.85rem;
+            }
+
+            .verified-badge {
+                font-size: 0.72rem;
+                padding: 0.45rem 0.75rem;
+                line-height: 1.35;
+                word-break: break-word;
+            }
+
+            .doc-section {
+                padding: 1.25rem 1rem;
+            }
+
+            .section-title {
+                font-size: 1.05rem;
+            }
+
+            .section-sub {
+                font-size: 0.75rem;
+            }
+
+            .hotel-grid,
+            .flight-grid {
+                grid-template-columns: 1fr;
+                gap: 0.85rem;
+            }
+
+            .hotel-card,
+            .flight-card {
+                padding: 0.85rem 1rem;
+            }
+
+            .pil-table-wrapper {
+                width: 100%;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                border: 1px solid var(--border);
+                border-radius: 10px;
+            }
+
+            .pil-table {
+                min-width: 480px;
+                margin: 0;
+            }
+
+            .pil-table th,
+            .pil-table td {
+                padding: 0.6rem 0.75rem;
+                font-size: 0.78rem;
+            }
+
+            .qr-flex-box {
+                flex-direction: column !important;
+                align-items: stretch !important;
+                padding: 1rem !important;
+            }
+
+            .qr-flex-box > div:first-child {
+                min-width: 100% !important;
+            }
+
+            .voucher-footer {
+                padding: 1rem;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.75rem;
+            }
+
+            .footer-seal {
+                font-size: 0.72rem;
+                flex-wrap: wrap;
+            }
+        }
+
+        @media (max-width: 420px) {
+            .header-group-info {
+                grid-template-columns: 1fr;
+            }
+
+            .company-name {
+                font-size: 1.3rem;
+            }
+
+            .btn {
+                font-size: 0.76rem;
+            }
+        }
+
         /* ---- PRINT STYLES ---- */
         @media print {
             body {
@@ -652,6 +808,7 @@
                 </div>
 
                 {% if pilgrims %}
+                <div class="pil-table-wrapper">
                 <table class="pil-table">
                     <thead>
                         <tr>
@@ -686,6 +843,7 @@
                         {% endfor %}
                     </tbody>
                 </table>
+                </div>
                 {% else %}
                 <div class="empty-state">
                     <i class="fa-solid fa-users-slash"></i>
@@ -835,7 +993,7 @@
                     </div>
                 </div>
 
-                <div
+                <div class="qr-flex-box"
                     style="display: flex; align-items: center; justify-content: space-between; gap: 1.5rem; flex-wrap: wrap; margin-top: 1rem; background: #ffffff; padding: 1.25rem 1.5rem; border-radius: 16px; border: 1.5px solid #cbd5e1;">
                     <div style="flex: 1; min-width: 260px;">
                         <div
