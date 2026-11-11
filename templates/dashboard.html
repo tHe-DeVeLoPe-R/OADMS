@@ -53,11 +53,11 @@
         </a>
         {% endif %}
         {% if groups|length > 1 %}
-        <form method="GET" action="{{ url_for('dashboard') }}" id="groupSelectorForm" style="display: flex; align-items: center; gap: 0.5rem;">
+        <form method="GET" action="{{ url_for('dashboard') }}" id="groupSelectorForm" style="display: flex; align-items: center; gap: 0.5rem;" onsubmit="if(window.PageLoader){ PageLoader.start(); PageLoader.showOverlay('Switching active group...'); }">
             <label style="font-size: 0.78rem; font-weight: 700; color: #047857; white-space: nowrap;">
                 <i class="fa-solid fa-arrows-rotate"></i> Switch:
             </label>
-            <select name="group" class="clay-select" style="min-width: 180px; padding: 0.45rem 0.85rem; font-size: 0.85rem;" onchange="this.form.submit()">
+            <select name="group" class="clay-select" style="min-width: 180px; padding: 0.45rem 0.85rem; font-size: 0.85rem;" onchange="if(window.PageLoader){ PageLoader.start(); PageLoader.showOverlay('Loading group ' + this.value + '...'); } this.form.submit()">
                 {% for g in groups %}
                 <option value="{{ g.group_code }}" {% if g.group_code == selected_group_code %}selected{% endif %}>
                     {{ g.group_code }} ({{ g.total_pax }} Pax)
@@ -413,9 +413,97 @@
                         {{ z.status }}
                     </span>
 
+                    <button type="button" onclick="openModal('editZyaratModal{{ z.id }}')" class="clay-btn clay-btn-sm clay-btn-secondary" style="padding: 0.35rem 0.65rem;" title="Edit / Update Trip">
+                        <i class="fa-solid fa-pen-to-square"></i> Edit
+                    </button>
                     <button type="button" onclick="openModal('zyaratModal{{ z.id }}')" class="clay-btn clay-btn-sm clay-btn-secondary">
                         <i class="fa-solid fa-circle-info"></i> Details
                     </button>
+                </div>
+            </div>
+
+            <!-- Edit Zyarat Modal -->
+            <div class="clay-modal-overlay" id="editZyaratModal{{ z.id }}">
+                <div class="clay-modal">
+                    <div class="modal-header">
+                        <div style="display: flex; align-items: center; gap: 0.65rem;">
+                            <div class="clay-icon-bubble sky" style="width: 36px; height: 36px; font-size: 1.1rem;">
+                                <i class="fa-solid fa-bus"></i>
+                            </div>
+                            <h3 style="font-size: 1.15rem; font-weight: 800; color: #064e3b;">
+                                Edit Zyarat Trip
+                            </h3>
+                        </div>
+                        <button type="button" onclick="closeModal('editZyaratModal{{ z.id }}')" class="modal-close-btn">&times;</button>
+                    </div>
+                    <form method="POST" action="{{ url_for('update_zyarat', zyarat_id=z.id) }}">
+                        <div style="display: grid; grid-template-columns: 1fr; gap: 0.85rem; margin-bottom: 1.25rem; text-align: left;">
+                            <div class="clay-input-group">
+                                <label class="clay-input-label">Trip Status *</label>
+                                <select name="status" class="clay-select" style="font-weight: 700; background: #f0fdf4;" required>
+                                    <option value="Completed" {% if z.status == 'Completed' %}selected{% endif %}>✅ Completed</option>
+                                    <option value="Scheduled" {% if z.status == 'Scheduled' %}selected{% endif %}>📅 Scheduled</option>
+                                    <option value="Departed" {% if z.status == 'Departed' %}selected{% endif %}>🚌 Departed</option>
+                                    <option value="Cancelled" {% if z.status == 'Cancelled' %}selected{% endif %}>❌ Cancelled</option>
+                                </select>
+                            </div>
+                            <div class="clay-input-group">
+                                <label class="clay-input-label">Destination *</label>
+                                <input type="text" name="destination" value="{{ z.destination }}" required class="clay-input">
+                            </div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+                                <div class="clay-input-group">
+                                    <label class="clay-input-label">City *</label>
+                                    <select name="city" class="clay-select" required>
+                                        <option value="Makkah" {% if z.city == 'Makkah' %}selected{% endif %}>Makkah</option>
+                                        <option value="Madinah" {% if z.city == 'Madinah' %}selected{% endif %}>Madinah</option>
+                                    </select>
+                                </div>
+                                <div class="clay-input-group">
+                                    <label class="clay-input-label">Date *</label>
+                                    <input type="date" name="zyarat_date" value="{{ z.zyarat_date }}" required class="clay-input">
+                                </div>
+                            </div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+                                <div class="clay-input-group">
+                                    <label class="clay-input-label">Booked Pax *</label>
+                                    <input type="number" name="booked_pax" value="{{ z.booked_pax }}" required class="clay-input">
+                                </div>
+                                <div class="clay-input-group">
+                                    <label class="clay-input-label">Actual Boarded Pax *</label>
+                                    <input type="number" name="actual_pax" value="{{ z.actual_pax }}" required class="clay-input">
+                                </div>
+                            </div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+                                <div class="clay-input-group">
+                                    <label class="clay-input-label">Departure Time</label>
+                                    <input type="text" name="departure_time" value="{{ z.departure_time or '' }}" class="clay-input">
+                                </div>
+                                <div class="clay-input-group">
+                                    <label class="clay-input-label">Bus Number</label>
+                                    <input type="text" name="bus_number" value="{{ z.bus_number or '' }}" class="clay-input">
+                                </div>
+                            </div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+                                <div class="clay-input-group">
+                                    <label class="clay-input-label">Assigned Murshid</label>
+                                    <input type="text" name="guide_murshid" value="{{ z.guide_murshid or '' }}" class="clay-input">
+                                </div>
+                                <div class="clay-input-group">
+                                    <label class="clay-input-label">Driver Contact</label>
+                                    <input type="text" name="driver_phone" value="{{ z.driver_phone or '' }}" class="clay-input">
+                                </div>
+                            </div>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <button type="button" onclick="closeModal('editZyaratModal{{ z.id }}')" class="clay-btn clay-btn-secondary clay-btn-sm">
+                                Cancel
+                            </button>
+                            <button type="submit" class="clay-btn clay-btn-primary clay-btn-sm">
+                                <i class="fa-solid fa-check"></i> Update Trip
+                            </button>
+                        </div>
+                    </form>
                 </div>
             </div>
 
@@ -692,24 +780,153 @@
         {% if flights %}
             <div style="display: flex; flex-direction: column; gap: 0.75rem;">
                 {% for f in flights %}
-                <div class="compact-card">
+                <div class="compact-card" style="border-left: 5px solid {% if f.route_type == 'Outbound' or f.route_type == 'Departure' %}#059669{% else %}#7e22ce{% endif %};">
                     <div>
-                        <strong style="color: #0f172a; font-size: 0.98rem;">
-                            <i class="fa-solid fa-plane" style="color: #7e22ce;"></i> {{ f.flight_number }}
+                        <strong style="color: #0f172a; font-size: 0.98rem; display: flex; align-items: center; gap: 6px;">
+                            {% if f.route_type == 'Outbound' or f.route_type == 'Departure' %}
+                                <i class="fa-solid fa-plane-departure" style="color: #059669;"></i>
+                            {% else %}
+                                <i class="fa-solid fa-plane-arrival" style="color: #7e22ce;"></i>
+                            {% endif %}
+                            {{ f.flight_number }}
+                            <span style="font-size: 0.72rem; padding: 2px 7px; border-radius: 999px; font-weight: 800; {% if f.route_type == 'Outbound' or f.route_type == 'Departure' %}background: #d1fae5; color: #065f46; border: 1px solid #a7f3d0;{% else %}background: #f3e8ff; color: #7e22ce; border: 1px solid #e9d5ff;{% endif %}">
+                                {% if f.route_type == 'Outbound' or f.route_type == 'Departure' %}
+                                    Outbound (PAK ➔ KSA)
+                                {% else %}
+                                    Inbound (KSA ➔ PAK)
+                                {% endif %}
+                            </span>
                         </strong>
-                        <span style="font-size: 0.76rem; color: var(--text-muted); margin-left: 4px;">({{ f.airline or f.group_code }})</span>
-                        <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 2px;">
-                            {{ f.route_type }} &bull; {{ f.airport }} &bull; <strong>{{ f.pax_count }} Pax</strong>
+                        <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 4px;">
+                            <span>{{ f.airline or 'Airline' }}</span> &bull; 
+                            <strong>Dep:</strong> {{ f.departure_time or f.flight_time or 'TBD' }} ({{ f.origin_city or ('Pakistan' if (f.route_type == 'Outbound' or f.route_type == 'Departure') else 'Saudi Arabia') }}) &bull; 
+                            <strong>Arr:</strong> {{ f.arrival_time or 'TBD' }} ({{ f.destination_city or ('Saudi Arabia' if (f.route_type == 'Outbound' or f.route_type == 'Departure') else 'Pakistan') }})
                         </div>
                     </div>
 
                     <div style="display: flex; align-items: center; gap: 0.5rem;">
-                        <span class="status-chip" style="background: #e0f2fe; color: #0369a1; font-size: 0.72rem;">
+                        <span class="status-chip" style="{% if f.status == 'Landed' %}background: #d1fae5; color: #065f46; border: 1px solid #a7f3d0;{% elif f.status == 'Delayed' %}background: #fee2e2; color: #991b1b; border: 1px solid #fecaca;{% else %}background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd;{% endif %} font-size: 0.72rem;">
                             {{ f.status }}
                         </span>
-                        <button type="button" onclick="openModal('flightModal{{ f.id }}')" class="clay-btn clay-btn-sm clay-btn-secondary" style="padding: 0.35rem 0.65rem;">
+                        <button type="button" onclick="openModal('editFlightModal{{ f.id }}')" class="clay-btn clay-btn-sm clay-btn-secondary" style="padding: 0.35rem 0.65rem;" title="Edit Flight & Schedule">
+                            <i class="fa-solid fa-pen-to-square"></i>
+                        </button>
+                        <button type="button" onclick="openModal('flightModal{{ f.id }}')" class="clay-btn clay-btn-sm clay-btn-secondary" style="padding: 0.35rem 0.65rem;" title="View Flight Details">
                             <i class="fa-solid fa-circle-info"></i>
                         </button>
+                    </div>
+                </div>
+
+                <!-- Edit Flight Modal -->
+                <div class="clay-modal-overlay" id="editFlightModal{{ f.id }}">
+                    <div class="clay-modal">
+                        <div class="modal-header">
+                            <div style="display: flex; align-items: center; gap: 0.65rem;">
+                                <div class="clay-icon-bubble purple" style="width: 36px; height: 36px; font-size: 1.1rem;">
+                                    <i class="fa-solid fa-plane-up"></i>
+                                </div>
+                                <h3 style="font-size: 1.15rem; font-weight: 800; color: #064e3b;">
+                                    Edit Flight: {{ f.flight_number }}
+                                </h3>
+                            </div>
+                            <button type="button" onclick="closeModal('editFlightModal{{ f.id }}')" class="modal-close-btn">&times;</button>
+                        </div>
+                        <form method="POST" action="{{ url_for('update_flight', flight_id=f.id) }}">
+                            <div style="display: grid; grid-template-columns: 1fr; gap: 0.85rem; margin-bottom: 1.25rem; text-align: left;">
+                                <div class="clay-input-group">
+                                    <label class="clay-input-label">Flight Direction / Route Type *</label>
+                                    <select name="route_type" class="clay-select" style="font-weight: 800; background: #f0fdf4;" required>
+                                        <option value="Outbound" {% if f.route_type == 'Outbound' or f.route_type == 'Departure' %}selected{% endif %}>
+                                            🛫 Outbound (Pakistan ➔ Saudi Arabia) [Voucher Primary]
+                                        </option>
+                                        <option value="Inbound" {% if f.route_type == 'Inbound' or f.route_type == 'Arrival' %}selected{% endif %}>
+                                            🛬 Inbound (Saudi Arabia ➔ Pakistan) [Return Journey]
+                                        </option>
+                                    </select>
+                                </div>
+                                <div class="clay-input-group">
+                                    <label class="clay-input-label">Flight Status *</label>
+                                    <select name="status" class="clay-select" style="font-weight: 700;" required>
+                                        <option value="On Time" {% if f.status == 'On Time' %}selected{% endif %}>🟢 On Time</option>
+                                        <option value="Landed" {% if f.status == 'Landed' %}selected{% endif %}>🛬 Landed</option>
+                                        <option value="Scheduled" {% if f.status == 'Scheduled' %}selected{% endif %}>📅 Scheduled</option>
+                                        <option value="Delayed" {% if f.status == 'Delayed' %}selected{% endif %}>⏳ Delayed</option>
+                                        <option value="Cancelled" {% if f.status == 'Cancelled' %}selected{% endif %}>❌ Cancelled</option>
+                                    </select>
+                                </div>
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+                                    <div class="clay-input-group">
+                                        <label class="clay-input-label">Flight Number *</label>
+                                        <input type="text" name="flight_number" value="{{ f.flight_number }}" required class="clay-input" style="text-transform: uppercase;">
+                                    </div>
+                                    <div class="clay-input-group">
+                                        <label class="clay-input-label">Airline</label>
+                                        <input type="text" name="airline" value="{{ f.airline or '' }}" class="clay-input">
+                                    </div>
+                                </div>
+
+                                <!-- Dual Time & City Inputs for Pakistan & Saudi Arabia -->
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; background: #f8fafc; padding: 0.75rem; border-radius: 12px; border: 1.5px solid #e2e8f0;">
+                                    <div class="clay-input-group">
+                                        <label class="clay-input-label" style="color: #064e3b; font-weight: 800;">
+                                            <i class="fa-solid fa-plane-departure" style="color: var(--primary);"></i> Departure Location
+                                        </label>
+                                        <input type="text" name="origin_city" value="{{ f.origin_city or ('Pakistan (LHE/ISB/KHI)' if (f.route_type == 'Outbound' or f.route_type == 'Departure') else 'Saudi Arabia (JED/MED)') }}" placeholder="e.g. Lahore (LHE)" class="clay-input">
+                                    </div>
+                                    <div class="clay-input-group">
+                                        <label class="clay-input-label" style="color: #064e3b; font-weight: 800;">
+                                            <i class="fa-regular fa-clock" style="color: var(--primary);"></i> Departure Time
+                                        </label>
+                                        <input type="text" name="departure_time" value="{{ f.departure_time or f.flight_time or '' }}" placeholder="HH:MM e.g. 03:30" class="clay-input">
+                                    </div>
+                                </div>
+
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; background: #f8fafc; padding: 0.75rem; border-radius: 12px; border: 1.5px solid #e2e8f0;">
+                                    <div class="clay-input-group">
+                                        <label class="clay-input-label" style="color: #7e22ce; font-weight: 800;">
+                                            <i class="fa-solid fa-plane-arrival" style="color: #7e22ce;"></i> Arrival Location
+                                        </label>
+                                        <input type="text" name="destination_city" value="{{ f.destination_city or ('Saudi Arabia (JED/MED)' if (f.route_type == 'Outbound' or f.route_type == 'Departure') else 'Pakistan (LHE/ISB/KHI)') }}" placeholder="e.g. Jeddah (JED)" class="clay-input">
+                                    </div>
+                                    <div class="clay-input-group">
+                                        <label class="clay-input-label" style="color: #7e22ce; font-weight: 800;">
+                                            <i class="fa-regular fa-clock" style="color: #7e22ce;"></i> Arrival Time
+                                        </label>
+                                        <input type="text" name="arrival_time" value="{{ f.arrival_time or '' }}" placeholder="HH:MM e.g. 07:15" class="clay-input">
+                                    </div>
+                                </div>
+
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+                                    <div class="clay-input-group">
+                                        <label class="clay-input-label">Flight Date</label>
+                                        <input type="date" name="flight_date" value="{{ f.flight_date or '' }}" class="clay-input">
+                                    </div>
+                                    <div class="clay-input-group">
+                                        <label class="clay-input-label">Airport Name / Code *</label>
+                                        <input type="text" name="airport" value="{{ f.airport or 'Jeddah (JED)' }}" required class="clay-input">
+                                    </div>
+                                </div>
+
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+                                    <div class="clay-input-group">
+                                        <label class="clay-input-label">Passenger Count *</label>
+                                        <input type="number" name="pax_count" value="{{ f.pax_count }}" required class="clay-input">
+                                    </div>
+                                    <div class="clay-input-group">
+                                        <label class="clay-input-label">Ground Transport</label>
+                                        <input type="text" name="transport_assigned" value="{{ f.transport_assigned or '' }}" placeholder="e.g. 11 Seater Coaster" class="clay-input">
+                                    </div>
+                                </div>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <button type="button" onclick="closeModal('editFlightModal{{ f.id }}')" class="clay-btn clay-btn-secondary clay-btn-sm">
+                                    Cancel
+                                </button>
+                                <button type="submit" class="clay-btn clay-btn-primary clay-btn-sm">
+                                    <i class="fa-solid fa-check"></i> Update Flight Movement
+                                </button>
+                            </div>
+                        </form>
                     </div>
                 </div>
 
@@ -733,24 +950,34 @@
                                 <span class="detail-val">{{ f.flight_number }}</span>
                             </div>
                             <div class="detail-row">
+                                <span class="detail-label">Route Category</span>
+                                <span class="detail-val" style="color: #064e3b; font-weight: 800;">
+                                    {% if f.route_type == 'Outbound' or f.route_type == 'Departure' %}
+                                        🛫 Outbound (Pakistan ➔ Saudi Arabia)
+                                    {% else %}
+                                        🛬 Inbound (Saudi Arabia ➔ Pakistan)
+                                    {% endif %}
+                                </span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Departure</span>
+                                <span class="detail-val">{{ f.origin_city or ('Pakistan' if (f.route_type == 'Outbound' or f.route_type == 'Departure') else 'Saudi Arabia') }} at <strong>{{ f.departure_time or f.flight_time or 'TBD' }}</strong></span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Arrival</span>
+                                <span class="detail-val">{{ f.destination_city or ('Saudi Arabia' if (f.route_type == 'Outbound' or f.route_type == 'Departure') else 'Pakistan') }} at <strong>{{ f.arrival_time or 'TBD' }}</strong></span>
+                            </div>
+                            <div class="detail-row">
                                 <span class="detail-label">Airline</span>
                                 <span class="detail-val">{{ f.airline or 'Commercial Airline' }}</span>
                             </div>
                             <div class="detail-row">
-                                <span class="detail-label">Group Code</span>
-                                <span class="detail-val">{{ f.group_code }}</span>
-                            </div>
-                            <div class="detail-row">
-                                <span class="detail-label">Movement Type</span>
-                                <span class="detail-val">{{ f.route_type }}</span>
+                                <span class="detail-label">Flight Date</span>
+                                <span class="detail-val">{{ f.flight_date or 'TBD' }}</span>
                             </div>
                             <div class="detail-row">
                                 <span class="detail-label">Airport</span>
                                 <span class="detail-val">{{ f.airport }}</span>
-                            </div>
-                            <div class="detail-row">
-                                <span class="detail-label">Date & Time</span>
-                                <span class="detail-val">{{ f.flight_date or '' }} {{ f.flight_time or '' }}</span>
                             </div>
                             <div class="detail-row">
                                 <span class="detail-label">Passenger Count</span>
@@ -814,12 +1041,82 @@
                     </div>
 
                     <div style="display: flex; align-items: center; gap: 0.5rem;">
-                        <span class="status-chip status-confirmed" style="font-size: 0.72rem;">
+                        <span class="status-chip {% if h.voucher_status == 'Confirmed' %}status-confirmed{% else %}status-pending{% endif %}" style="font-size: 0.72rem;">
                             {{ h.voucher_status }}
                         </span>
-                        <button type="button" onclick="openModal('hotelModal{{ h.id }}')" class="clay-btn clay-btn-sm clay-btn-secondary" style="padding: 0.35rem 0.65rem;">
+                        <button type="button" onclick="openModal('editHotelModal{{ h.id }}')" class="clay-btn clay-btn-sm clay-btn-secondary" style="padding: 0.35rem 0.65rem;" title="Edit / Update Status">
+                            <i class="fa-solid fa-pen-to-square"></i>
+                        </button>
+                        <button type="button" onclick="openModal('hotelModal{{ h.id }}')" class="clay-btn clay-btn-sm clay-btn-secondary" style="padding: 0.35rem 0.65rem;" title="View Details">
                             <i class="fa-solid fa-circle-info"></i>
                         </button>
+                    </div>
+                </div>
+
+                <!-- Edit Hotel Modal -->
+                <div class="clay-modal-overlay" id="editHotelModal{{ h.id }}">
+                    <div class="clay-modal">
+                        <div class="modal-header">
+                            <div style="display: flex; align-items: center; gap: 0.65rem;">
+                                <div class="clay-icon-bubble emerald" style="width: 36px; height: 36px; font-size: 1.1rem;">
+                                    <i class="fa-solid fa-hotel"></i>
+                                </div>
+                                <h3 style="font-size: 1.15rem; font-weight: 800; color: #064e3b;">
+                                    Edit Hotel: {{ h.hotel_name }}
+                                </h3>
+                            </div>
+                            <button type="button" onclick="closeModal('editHotelModal{{ h.id }}')" class="modal-close-btn">&times;</button>
+                        </div>
+                        <form method="POST" action="{{ url_for('update_hotel', hotel_id=h.id) }}">
+                            <div style="display: grid; grid-template-columns: 1fr; gap: 0.85rem; margin-bottom: 1.25rem; text-align: left;">
+                                <div class="clay-input-group">
+                                    <label class="clay-input-label">Voucher Status *</label>
+                                    <select name="voucher_status" class="clay-select" style="font-weight: 700; background: #f0fdf4;" required>
+                                        <option value="Confirmed" {% if h.voucher_status == 'Confirmed' %}selected{% endif %}>✅ Confirmed</option>
+                                        <option value="Pending" {% if h.voucher_status == 'Pending' %}selected{% endif %}>⏳ Pending</option>
+                                    </select>
+                                </div>
+                                <div class="clay-input-group">
+                                    <label class="clay-input-label">Hotel Name *</label>
+                                    <input type="text" name="hotel_name" value="{{ h.hotel_name }}" required class="clay-input">
+                                </div>
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+                                    <div class="clay-input-group">
+                                        <label class="clay-input-label">City *</label>
+                                        <select name="city" class="clay-select" required>
+                                            <option value="Makkah" {% if h.city == 'Makkah' %}selected{% endif %}>Makkah</option>
+                                            <option value="Madinah" {% if h.city == 'Madinah' %}selected{% endif %}>Madinah</option>
+                                        </select>
+                                    </div>
+                                    <div class="clay-input-group">
+                                        <label class="clay-input-label">Rooms Allocated *</label>
+                                        <input type="number" name="rooms_allocated" value="{{ h.rooms_allocated }}" required class="clay-input">
+                                    </div>
+                                </div>
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+                                    <div class="clay-input-group">
+                                        <label class="clay-input-label">Check-In Date *</label>
+                                        <input type="date" name="check_in_date" value="{{ h.check_in_date }}" required class="clay-input">
+                                    </div>
+                                    <div class="clay-input-group">
+                                        <label class="clay-input-label">Check-Out Date *</label>
+                                        <input type="date" name="check_out_date" value="{{ h.check_out_date }}" required class="clay-input">
+                                    </div>
+                                </div>
+                                <div class="clay-input-group">
+                                    <label class="clay-input-label">Assigned Ground Coordinator</label>
+                                    <input type="text" name="assigned_coordinator" value="{{ h.assigned_coordinator or '' }}" class="clay-input">
+                                </div>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <button type="button" onclick="closeModal('editHotelModal{{ h.id }}')" class="clay-btn clay-btn-secondary clay-btn-sm">
+                                    Cancel
+                                </button>
+                                <button type="submit" class="clay-btn clay-btn-primary clay-btn-sm">
+                                    <i class="fa-solid fa-check"></i> Update Hotel
+                                </button>
+                            </div>
+                        </form>
                     </div>
                 </div>
 

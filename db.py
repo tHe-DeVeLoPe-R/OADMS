@@ -218,8 +218,12 @@ def init_db():
                 group_code VARCHAR(50) NOT NULL,
                 flight_number VARCHAR(30) NOT NULL,
                 airline VARCHAR(50),
-                route_type ENUM('Arrival', 'Departure') NOT NULL,
+                route_type VARCHAR(50) NOT NULL DEFAULT 'Outbound',
                 airport VARCHAR(50) NOT NULL,
+                origin_city VARCHAR(100) DEFAULT 'Pakistan',
+                departure_time VARCHAR(30),
+                destination_city VARCHAR(100) DEFAULT 'Saudi Arabia',
+                arrival_time VARCHAR(30),
                 flight_date DATE,
                 flight_time VARCHAR(30),
                 pax_count INT NOT NULL,
@@ -228,6 +232,24 @@ def init_db():
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
             """)
+
+            # Ensure all flight columns exist if table was created previously
+            try:
+                cursor.execute("SHOW COLUMNS FROM flight_tracker")
+                mysql_flight_cols = [c.get('Field') if isinstance(c, dict) else c[0] for c in cursor.fetchall()]
+                missing_flight_cols = [
+                    ('origin_city', 'VARCHAR(100) DEFAULT NULL'),
+                    ('departure_time', 'VARCHAR(30) DEFAULT NULL'),
+                    ('destination_city', 'VARCHAR(100) DEFAULT NULL'),
+                    ('arrival_time', 'VARCHAR(30) DEFAULT NULL'),
+                    ('flight_date', 'DATE DEFAULT NULL'),
+                    ('airline', 'VARCHAR(50) DEFAULT NULL')
+                ]
+                for col_name, col_type in missing_flight_cols:
+                    if col_name not in mysql_flight_cols:
+                        cursor.execute(f"ALTER TABLE flight_tracker ADD COLUMN {col_name} {col_type};")
+            except Exception as e:
+                print(f"[DB Warning] Could not check or alter MySQL flight_tracker columns: {e}")
 
             cursor.execute("""
             CREATE TABLE IF NOT EXISTS hotel_transfers (
@@ -333,8 +355,12 @@ def init_db():
                 group_code TEXT NOT NULL,
                 flight_number TEXT NOT NULL,
                 airline TEXT,
-                route_type TEXT NOT NULL,
+                route_type TEXT NOT NULL DEFAULT 'Outbound',
                 airport TEXT NOT NULL,
+                origin_city TEXT DEFAULT 'Pakistan',
+                departure_time TEXT,
+                destination_city TEXT DEFAULT 'Saudi Arabia',
+                arrival_time TEXT,
                 flight_date DATE,
                 flight_time TEXT,
                 pax_count INTEGER NOT NULL,

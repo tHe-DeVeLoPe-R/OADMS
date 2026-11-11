@@ -176,6 +176,99 @@
             font-weight: 800;
         }
 
+        .header-top-row {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .header-titles {
+            flex: 1;
+            min-width: 260px;
+        }
+
+        .header-right-meta {
+            display: flex;
+            align-items: stretch;
+            gap: 0.85rem;
+            flex-shrink: 0;
+        }
+
+        .header-logo-card {
+            background: #ffffff;
+            padding: 8px 12px;
+            border-radius: 16px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.16);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid rgba(255, 255, 255, 0.9);
+            min-width: 105px;
+        }
+
+        .header-logo-img {
+            height: 68px;
+            width: auto;
+            max-width: 125px;
+            object-fit: contain;
+            display: block;
+        }
+
+        .header-qr-card {
+            background: #ffffff;
+            padding: 6px 8px 7px;
+            border-radius: 16px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.16);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid rgba(255, 255, 255, 0.9);
+            text-align: center;
+            min-width: 114px;
+        }
+
+        .header-qr-box {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 96px;
+            height: 96px;
+            border-radius: 6px;
+            background: #ffffff;
+        }
+
+        .header-qr-box img,
+        .header-qr-box canvas {
+            display: block;
+            width: 96px !important;
+            height: 96px !important;
+        }
+
+        .header-qr-tag {
+            margin-top: 4px;
+            font-size: 0.62rem;
+            font-weight: 800;
+            color: #065f46;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 3px;
+            white-space: nowrap;
+        }
+
+        .header-qr-sub {
+            font-size: 0.58rem;
+            font-weight: 700;
+            color: #64748b;
+            letter-spacing: 0.02em;
+            white-space: nowrap;
+        }
+
         .verified-badge {
             display: inline-flex;
             align-items: center;
@@ -451,13 +544,15 @@
         }
 
         .arrival-badge {
-            background: #dbeafe;
-            color: #1e40af;
+            background: #f3e8ff;
+            color: #6b21a8;
+            border: 1px solid #e9d5ff;
         }
 
         .departure-badge {
-            background: #fce7f3;
-            color: #9d174d;
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #a7f3d0;
         }
 
         /* ---- EMPTY STATE ---- */
@@ -551,10 +646,31 @@
                 display: none;
             }
 
-            .voucher-header > div:first-child {
-                flex-direction: column-reverse;
-                align-items: flex-start;
+            .header-top-row {
+                flex-direction: column;
+                align-items: stretch;
                 gap: 1rem;
+            }
+
+            .header-right-meta {
+                width: 100%;
+                justify-content: flex-start;
+                gap: 0.75rem;
+                flex-wrap: wrap;
+            }
+
+            .header-logo-card {
+                padding: 6px 10px;
+                min-width: 90px;
+            }
+
+            .header-logo-img {
+                height: 52px;
+            }
+
+            .header-qr-card {
+                padding: 6px 8px;
+                min-width: 106px;
             }
 
             .company-name {
@@ -629,16 +745,6 @@
                 font-size: 0.78rem;
             }
 
-            .qr-flex-box {
-                flex-direction: column !important;
-                align-items: stretch !important;
-                padding: 1rem !important;
-            }
-
-            .qr-flex-box > div:first-child {
-                min-width: 100% !important;
-            }
-
             .voucher-footer {
                 padding: 1rem;
                 flex-direction: column;
@@ -655,6 +761,10 @@
         @media (max-width: 420px) {
             .header-group-info {
                 grid-template-columns: 1fr;
+            }
+
+            .header-right-meta {
+                justify-content: flex-start;
             }
 
             .company-name {
@@ -681,30 +791,177 @@
             opacity: 0;
         }
 
-        /* ---- PRINT STYLES ---- */
+        /* ---- PRINT STYLES (Single Page / Compact Optimization) ---- */
         @media print {
-            body {
-                background: #fff;
-                padding: 0;
+            @page {
+                size: A4 portrait;
+                margin: 7mm 8mm 7mm 8mm;
             }
 
-            .action-bar {
+            html, body {
+                background: #ffffff !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                font-size: 11.5px;
+                color: #0f172a !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+
+            .no-print,
+            .action-bar,
+            #voucherProgressBar {
                 display: none !important;
             }
 
-            .voucher-doc {
-                box-shadow: none;
-                border-radius: 0;
-                border: none;
+            .voucher-wrap {
+                max-width: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
             }
 
-            .voucher-wrap {
-                max-width: 100%;
-                margin: 0;
+            .voucher-doc {
+                box-shadow: none !important;
+                border-radius: 0 !important;
+                border: 1px solid #cbd5e1 !important;
+                overflow: visible !important;
+            }
+
+            .voucher-header {
+                padding: 1.1rem 1.5rem 0.95rem !important;
+                page-break-inside: avoid !important;
+                background: #064e3b !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+
+            .header-top-line {
+                font-size: 0.62rem !important;
+                margin-bottom: 0.2rem !important;
+            }
+
+            .company-name {
+                font-size: 1.55rem !important;
+                margin-bottom: 0.15rem !important;
+            }
+
+            .company-lic {
+                font-size: 0.74rem !important;
+                margin-bottom: 0.65rem !important;
+            }
+
+            .verified-badge {
+                margin-bottom: 0.65rem !important;
+                padding: 0.3rem 0.7rem !important;
+                font-size: 0.72rem !important;
+            }
+
+            .header-group-info {
+                gap: 0.5rem 0.85rem !important;
+                margin-top: 0.35rem !important;
+            }
+
+            .hgi-item label {
+                font-size: 0.58rem !important;
+                margin-bottom: 1px !important;
+            }
+
+            .hgi-item .hgi-val {
+                font-size: 0.82rem !important;
+            }
+
+            .header-logo-card {
+                box-shadow: none !important;
+                border: 1.5px solid #cbd5e1 !important;
+                padding: 5px 8px !important;
+                min-width: 90px !important;
+            }
+
+            .header-logo-img {
+                height: 50px !important;
+            }
+
+            .header-qr-card {
+                box-shadow: none !important;
+                border: 1.5px solid #cbd5e1 !important;
+                padding: 4px 6px 5px !important;
+                min-width: 92px !important;
+            }
+
+            .header-qr-box,
+            .header-qr-box img,
+            .header-qr-box canvas {
+                width: 80px !important;
+                height: 80px !important;
+            }
+
+            .header-qr-tag {
+                font-size: 0.58rem !important;
+                margin-top: 2px !important;
+            }
+
+            .header-qr-sub {
+                font-size: 0.54rem !important;
             }
 
             .doc-section {
-                page-break-inside: avoid;
+                padding: 0.75rem 1.5rem !important;
+                page-break-inside: auto !important;
+            }
+
+            .section-heading {
+                margin-bottom: 0.45rem !important;
+            }
+
+            .section-icon {
+                width: 28px !important;
+                height: 28px !important;
+                font-size: 0.75rem !important;
+            }
+
+            .section-title {
+                font-size: 0.92rem !important;
+            }
+
+            .section-sub {
+                font-size: 0.68rem !important;
+            }
+
+            .pil-table-wrapper {
+                border: none !important;
+                overflow: visible !important;
+            }
+
+            .pil-table {
+                min-width: 100% !important;
+            }
+
+            .pil-table th,
+            .pil-table td {
+                padding: 3.5px 6px !important;
+                font-size: 0.74rem !important;
+            }
+
+            .pil-table tr {
+                page-break-inside: avoid !important;
+            }
+
+            .hotel-grid,
+            .flight-grid {
+                gap: 0.5rem !important;
+            }
+
+            .hotel-card,
+            .flight-card {
+                padding: 0.6rem 0.85rem !important;
+                page-break-inside: avoid !important;
+                border: 1px solid #cbd5e1 !important;
+                box-shadow: none !important;
+            }
+
+            .voucher-footer {
+                padding: 0.6rem 1.5rem !important;
+                page-break-inside: avoid !important;
             }
         }
     </style>
@@ -719,7 +976,8 @@
         <!-- Top Action Bar (Hidden when printing) -->
         <div class="action-bar no-print">
             <div class="portal-badge" style="display: inline-flex; align-items: center; gap: 0.65rem;">
-                <img src="{{ url_for('static', filename='images/logoutw.png') }}" alt="Logo" style="height: 22px; width: auto; object-fit: contain;">
+                <img src="{{ url_for('static', filename='images/logoutw.png') }}" alt="Logo"
+                    style="height: 22px; width: auto; object-fit: contain;">
                 <span>Official Verification Portal &bull; Lic. 8488</span>
             </div>
             <div class="action-buttons">
@@ -733,15 +991,18 @@
         </div>
 
         <!-- Phone Scan QR Target URL Bar (Hidden when printing) -->
-        <div class="action-bar no-print" style="background: #ffffff; padding: 0.75rem 1.25rem; border-radius: 14px; border: 1.5px solid #a7f3d0; box-shadow: 0 2px 10px rgba(6, 78, 59, 0.06); margin-bottom: 1.25rem;">
+        <div class="action-bar no-print"
+            style="background: #ffffff; padding: 0.75rem 1.25rem; border-radius: 14px; border: 1.5px solid #a7f3d0; box-shadow: 0 2px 10px rgba(6, 78, 59, 0.06); margin-bottom: 1.25rem;">
             <div style="display: flex; align-items: center; gap: 0.75rem; flex: 1; min-width: 280px; flex-wrap: wrap;">
-                <label for="customQrUrlInput" style="font-size: 0.82rem; font-weight: 800; color: #064e3b; white-space: nowrap; display: flex; align-items: center; gap: 6px;">
+                <label for="customQrUrlInput"
+                    style="font-size: 0.82rem; font-weight: 800; color: #064e3b; white-space: nowrap; display: flex; align-items: center; gap: 6px;">
                     <i class="fa-solid fa-mobile-screen-button" style="color: var(--primary);"></i> Scannable URL:
                 </label>
                 <input type="text" id="customQrUrlInput" value="{{ default_qr_url }}"
-                       style="flex: 1; min-width: 240px; padding: 0.45rem 0.85rem; font-size: 0.82rem; font-family: monospace; border-radius: 10px; border: 1.5px solid #cbd5e1; background: #f8fafc; color: #064e3b; font-weight: 600;"
-                       placeholder="http://10.x.x.x:5000/... or https://your-public-site.vercel.app/...">
-                <button type="button" onclick="generateGroupQRCode(document.getElementById('customQrUrlInput').value)" class="btn btn-qr" style="padding: 0.45rem 1rem; font-size: 0.8rem;">
+                    style="flex: 1; min-width: 240px; padding: 0.45rem 0.85rem; font-size: 0.82rem; font-family: monospace; border-radius: 10px; border: 1.5px solid #cbd5e1; background: #f8fafc; color: #064e3b; font-weight: 600;"
+                    placeholder="http://10.x.x.x:5000/... or https://your-public-site.vercel.app/...">
+                <button type="button" onclick="generateGroupQRCode(document.getElementById('customQrUrlInput').value)"
+                    class="btn btn-qr" style="padding: 0.45rem 1rem; font-size: 0.8rem;">
                     <i class="fa-solid fa-arrows-rotate"></i> Update QR
                 </button>
             </div>
@@ -752,8 +1013,8 @@
 
             <!-- ===== HEADER ===== -->
             <div class="voucher-header">
-                <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 1.5rem; flex-wrap: wrap;">
-                    <div style="flex: 1; min-width: 260px;">
+                <div class="header-top-row">
+                    <div class="header-titles">
                         <div class="header-top-line">HOTEL VOUCHER (Official Travel Document)</div>
                         <div class="company-name">Urwat il Wusqa Travels</div>
                         <div class="company-lic">
@@ -761,8 +1022,23 @@
                             <span>8488</span>
                         </div>
                     </div>
-                    <div style="background: #ffffff; padding: 10px 14px; border-radius: 18px; box-shadow: 0 6px 20px rgba(0,0,0,0.18); display: flex; align-items: center; justify-content: center; border: 2px solid rgba(255,255,255,0.85);">
-                        <img src="{{ url_for('static', filename='images/logoutw.png') }}" alt="Urwat il Wusqa Travels Official Logo" style="height: 72px; width: auto; max-width: 130px; object-fit: contain; display: block;">
+                    <div class="header-right-meta">
+                        <!-- Official Logo Card -->
+                        <div class="header-logo-card">
+                            <img src="{{ url_for('static', filename='images/logoutw.png') }}"
+                                alt="Urwat il Wusqa Travels Official Logo"
+                                class="header-logo-img">
+                        </div>
+                        <!-- Official Top-Corner Verification QR Code Card -->
+                        <div class="header-qr-card">
+                            <div id="qrcodeBox" class="header-qr-box" title="Official Group Verification QR Code">
+                                <!-- QR code rendered here -->
+                            </div>
+                            <div class="header-qr-tag">
+                                <i class="fa-solid fa-qrcode"></i> SCAN TO VERIFY
+                            </div>
+                            <div class="header-qr-sub">Official Live Portal</div>
+                        </div>
                     </div>
                 </div>
 
@@ -827,40 +1103,41 @@
 
                 {% if pilgrims %}
                 <div class="pil-table-wrapper">
-                <table class="pil-table">
-                    <thead>
-                        <tr>
-                            <th class="serial-no">#</th>
-                            <th>Pilgrim Name</th>
-                            <th>Passport Number</th>
-                            <th>Purpose</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for p in pilgrims %}
-                        <tr>
-                            <td class="serial-no">{{ loop.index }}</td>
-                            <td style="font-weight: 700; color: #0f172a;">
-                                <i class="fa-solid fa-user"
-                                    style="color: var(--primary); margin-right: 6px; font-size: 0.82rem;"></i>{{ p.name
-                                }}
-                            </td>
-                            <td>
-                                {% if p.passport_number %}
-                                <span class="passport-mono">{{ p.passport_number }}</span>
-                                {% else %}
-                                <span style="color: var(--text-muted);">—</span>
-                                {% endif %}
-                            </td>
-                            <td>
-                                <span class="purpose-badge">
-                                    <i class="fa-solid fa-kaaba"></i> Umrah
-                                </span>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+                    <table class="pil-table">
+                        <thead>
+                            <tr>
+                                <th class="serial-no">#</th>
+                                <th>Pilgrim Name</th>
+                                <th>Passport Number</th>
+                                <th>Purpose</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for p in pilgrims %}
+                            <tr>
+                                <td class="serial-no">{{ loop.index }}</td>
+                                <td style="font-weight: 700; color: #0f172a;">
+                                    <i class="fa-solid fa-user"
+                                        style="color: var(--primary); margin-right: 6px; font-size: 0.82rem;"></i>{{
+                                    p.name
+                                    }}
+                                </td>
+                                <td>
+                                    {% if p.passport_number %}
+                                    <span class="passport-mono">{{ p.passport_number }}</span>
+                                    {% else %}
+                                    <span style="color: var(--text-muted);">—</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <span class="purpose-badge">
+                                        <i class="fa-solid fa-kaaba"></i> Umrah
+                                    </span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
                 </div>
                 {% else %}
                 <div class="empty-state">
@@ -935,34 +1212,78 @@
             <div class="doc-section">
                 <div class="section-heading">
                     <div class="section-icon icon-purple">
-                        <i class="fa-solid fa-plane"></i>
+                        <i class="fa-solid fa-plane-departure"></i>
                     </div>
                     <div>
-                        <div class="section-title">Flight Movements</div>
-                        <div class="section-sub">{{ flights|length }} flight(s) tracked for this group</div>
+                        <div class="section-title">Flight Schedule &amp; Airport Movements</div>
+                        <div class="section-sub">Outbound (Pakistan ➔ KSA) &amp; Inbound (KSA ➔ Pakistan) flight
+                            credentials for airport verification</div>
                     </div>
                 </div>
 
                 {% if flights %}
                 <div class="flight-grid">
                     {% for f in flights %}
-                    <div class="flight-card">
-                        <div class="flight-card-num">
-                            <i class="fa-solid fa-plane" style="color: #7c3aed; margin-right: 6px;"></i>
-                            {{ f.flight_number }}
+                    <div class="flight-card"
+                        style="border-left: 5px solid {% if f.route_type == 'Outbound' or f.route_type == 'Departure' %}#059669{% else %}#7c3aed{% endif %};">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;">
+                            <div>
+                                <div class="flight-card-num" style="display: flex; align-items: center; gap: 6px;">
+                                    {% if f.route_type == 'Outbound' or f.route_type == 'Departure' %}
+                                    <i class="fa-solid fa-plane-departure" style="color: #059669;"></i>
+                                    {% else %}
+                                    <i class="fa-solid fa-plane-arrival" style="color: #7c3aed;"></i>
+                                    {% endif %}
+                                    {{ f.flight_number }}
+                                </div>
+                                <div class="flight-airline">{{ f.airline or 'Commercial Airline' }}</div>
+                            </div>
+                            <span
+                                class="route-badge {% if f.route_type == 'Outbound' or f.route_type == 'Departure' %}departure-badge{% else %}arrival-badge{% endif %}">
+                                {% if f.route_type == 'Outbound' or f.route_type == 'Departure' %}
+                                <i class="fa-solid fa-plane-departure"></i> Outbound (PAK ➔ KSA)
+                                {% else %}
+                                <i class="fa-solid fa-plane-arrival"></i> Inbound (KSA ➔ PAK)
+                                {% endif %}
+                            </span>
                         </div>
-                        <div class="flight-airline">{{ f.airline or 'Commercial Airline' }}</div>
+
+                        <!-- Departure & Arrival Box -->
+                        <div
+                            style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 8px 10px; margin: 8px 0;">
+                            <div
+                                style="display: flex; justify-content: space-between; font-size: 0.77rem; margin-bottom: 4px;">
+                                <span style="color: var(--text-muted); font-weight: 600;">
+                                    <i class="fa-solid fa-plane-departure"
+                                        style="color: #059669; font-size: 0.72rem;"></i> Departure:
+                                </span>
+                                <span style="font-weight: 800; color: #0f172a;">
+                                    {{ f.origin_city or ('Pakistan' if (f.route_type == 'Outbound' or f.route_type ==
+                                    'Departure') else 'Saudi Arabia') }}
+                                    &bull; <span style="color: #047857;">{{ f.departure_time or f.flight_time or 'TBD'
+                                        }}</span>
+                                </span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; font-size: 0.77rem;">
+                                <span style="color: var(--text-muted); font-weight: 600;">
+                                    <i class="fa-solid fa-plane-arrival"
+                                        style="color: #7c3aed; font-size: 0.72rem;"></i> Arrival:
+                                </span>
+                                <span style="font-weight: 800; color: #0f172a;">
+                                    {{ f.destination_city or ('Saudi Arabia' if (f.route_type == 'Outbound' or
+                                    f.route_type == 'Departure') else 'Pakistan') }}
+                                    &bull; <span style="color: #7c3aed;">{{ f.arrival_time or 'TBD' }}</span>
+                                </span>
+                            </div>
+                        </div>
+
                         <div class="flight-row">
                             <span>Airport</span>
                             <span>{{ f.airport }}</span>
                         </div>
                         <div class="flight-row">
-                            <span>Date</span>
+                            <span>Flight Date</span>
                             <span>{{ f.flight_date or '—' }}</span>
-                        </div>
-                        <div class="flight-row">
-                            <span>Time</span>
-                            <span>{{ f.flight_time or '—' }}</span>
                         </div>
                         <div class="flight-row">
                             <span>Passengers</span>
@@ -970,80 +1291,23 @@
                         </div>
                         {% if f.transport_assigned %}
                         <div class="flight-row">
-                            <span>Transport</span>
-                            <span>{{ f.transport_assigned }}</span>
+                            <span>Group Transport</span>
+                            <span>YES</span>
                         </div>
                         {% endif %}
                         <div class="flight-row">
-                            <span>Status</span>
+                            <span>Flight Status</span>
                             <span style="color: var(--primary); font-weight: 800;">{{ f.status }}</span>
                         </div>
-                        <span
-                            class="route-badge {% if f.route_type == 'Arrival' %}arrival-badge{% else %}departure-badge{% endif %}">
-                            {% if f.route_type == 'Arrival' %}
-                            <i class="fa-solid fa-plane-arrival"></i> Arrival
-                            {% else %}
-                            <i class="fa-solid fa-plane-departure"></i> Departure
-                            {% endif %}
-                        </span>
                     </div>
                     {% endfor %}
                 </div>
                 {% else %}
                 <div class="empty-state">
                     <i class="fa-solid fa-plane-slash"></i>
-                    <p>No details yet</p>
+                    <p>No flight details registered yet</p>
                 </div>
                 {% endif %}
-            </div>
-
-            <!-- ===== SECTION 4: OFFICIAL GROUP VERIFICATION QR CODE ===== -->
-            <div class="doc-section qr-verification-section" id="qrVerificationSection"
-                style="background: linear-gradient(135deg, #f8fafc 0%, #f0fdf4 100%);">
-                <div class="section-heading" style="margin-bottom: 0.75rem;">
-                    <div class="section-icon icon-green">
-                        <i class="fa-solid fa-qrcode"></i>
-                    </div>
-                    <div>
-                        <div class="section-title">Official Group Verification QR Code</div>
-                        <div class="section-sub">Scannable by any authorized Airport &amp; Hotel Authorities to verify
-                            live trip data.</div>
-                    </div>
-                </div>
-
-                <div class="qr-flex-box"
-                    style="display: flex; align-items: center; justify-content: space-between; gap: 1.5rem; flex-wrap: wrap; margin-top: 1rem; background: #ffffff; padding: 1.25rem 1.5rem; border-radius: 16px; border: 1.5px solid #cbd5e1;">
-                    <div style="flex: 1; min-width: 260px;">
-                        <div
-                            style="display: inline-flex; align-items: center; gap: 0.45rem; padding: 3px 10px; background: #d1fae5; color: #065f46; border-radius: 999px; font-size: 0.72rem; font-weight: 800; text-transform: uppercase; margin-bottom: 0.65rem;">
-                            <i class="fa-solid fa-certificate"></i> Verified by Urwat il Wusqa Travels (Lic. 8488)
-                        </div>
-                        <div style="font-size: 0.95rem; font-weight: 800; color: #064e3b; margin-bottom: 0.35rem;">
-                            Scan To Verify Group Hotel &amp; Flight Voucher
-                        </div>
-                        <div style="font-size: 0.82rem; color: #475569; line-height: 1.5; margin-bottom: 0.75rem;">
-                            Airport authorities scanning this QR code are redirected directly to this official live
-                            voucher portal to verify hotel booking confirmations and flight schedules for group
-                            <strong>{{ group.group_code }}</strong>.
-                        </div>
-                        <div
-                            style="font-size: 0.73rem; color: #64748b; font-family: monospace; background: #f8fafc; padding: 6px 10px; border-radius: 8px; border: 1px solid #e2e8f0; word-break: break-all;">
-                            <i class="fa-solid fa-link" style="color: var(--primary); margin-right: 4px;"></i>
-                            <span id="targetUrlText"></span>
-                        </div>
-                    </div>
-
-                    <div style="text-align: center; flex-shrink: 0; margin: 0 auto;">
-                        <div id="qrcodeBox"
-                            style="background: #ffffff; padding: 10px; border-radius: 12px; border: 2px solid #a7f3d0; display: inline-flex; justify-content: center; align-items: center; min-width: 140px; min-height: 140px; box-shadow: 0 4px 14px rgba(6, 78, 59, 0.08);">
-                            <!-- QR code rendered here -->
-                        </div>
-                        <div
-                            style="font-size: 0.72rem; font-weight: 800; color: #047857; text-transform: uppercase; letter-spacing: 0.08em; margin-top: 6px;">
-                            <i class="fa-solid fa-expand" style="margin-right: 3px;"></i> Official Scan Code
-                        </div>
-                    </div>
-                </div>
             </div>
 
             <!-- ===== FOOTER ===== -->
@@ -1051,9 +1315,11 @@
                 <div class="footer-text">
                     <i class="fa-solid fa-calendar-day" style="color: var(--primary);"></i>
                     Document generated on {{ now }}
+                    &bull; <span style="font-family: monospace; font-size: 0.72rem; color: #475569;" id="targetUrlText"></span>
                 </div>
                 <div class="footer-seal" style="display: flex; align-items: center; gap: 0.5rem;">
-                    <img src="{{ url_for('static', filename='images/logoutw.png') }}" alt="Logo" style="height: 22px; width: auto; object-fit: contain;">
+                    <img src="{{ url_for('static', filename='images/logoutw.png') }}" alt="Logo"
+                        style="height: 22px; width: auto; object-fit: contain;">
                     <span>Urwat il Wusqa Travels &bull; Lic. 8488 &bull; Verified &amp; Authorized</span>
                 </div>
             </div>
@@ -1089,8 +1355,8 @@
             if (typeof QRCode !== 'undefined') {
                 new QRCode(qrcodeBox, {
                     text: activeUrl,
-                    width: 132,
-                    height: 132,
+                    width: 96,
+                    height: 96,
                     colorDark: '#064e3b',
                     colorLight: '#ffffff',
                     correctLevel: QRCode.CorrectLevel.M
@@ -1098,10 +1364,10 @@
             } else {
                 // Fallback to QR server API image
                 const img = document.createElement('img');
-                img.src = 'https://api.qrserver.com/v1/create-qr-code/?size=132x132&color=064e3b&data=' + encodeURIComponent(activeUrl);
+                img.src = 'https://api.qrserver.com/v1/create-qr-code/?size=96x96&color=064e3b&data=' + encodeURIComponent(activeUrl);
                 img.alt = 'Group Verification QR Code';
-                img.style.width = '132px';
-                img.style.height = '132px';
+                img.style.width = '96px';
+                img.style.height = '96px';
                 img.style.display = 'block';
                 qrcodeBox.appendChild(img);
             }
@@ -1109,13 +1375,13 @@
             // Update button text to give clear feedback
             const btn = document.getElementById('btnGenQR');
             if (btn) {
-                btn.innerHTML = '<i class="fa-solid fa-circle-check" style="color: #34d399;"></i> QR Code Generated';
+                btn.innerHTML = '<i class="fa-solid fa-circle-check" style="color: #34d399;"></i> QR Ready';
                 btn.style.background = '#047857';
             }
         }
 
         // Progress Bar on Voucher page load
-        (function() {
+        (function () {
             const bar = document.getElementById('voucherProgressBar');
             if (!bar) return;
             bar.style.opacity = '1';

@@ -648,8 +648,8 @@ h1, h2, h3, h4, h5, h6 {
 
 .loader-spinner-wrap {
   position: relative;
-  width: 58px;
-  height: 58px;
+  width: 68px;
+  height: 68px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -664,6 +664,16 @@ h1, h2, h3, h4, h5, h6 {
   border-right-color: #047857;
   animation: utwSpin 0.85s linear infinite;
   box-shadow: 0 4px 14px rgba(5, 150, 105, 0.15);
+}
+
+.loader-logo-img {
+  position: absolute;
+  width: 38px;
+  height: 38px;
+  object-fit: contain;
+  border-radius: 50%;
+  animation: pulseScale 1.6s ease-in-out infinite;
+  filter: drop-shadow(0 2px 5px rgba(6, 78, 59, 0.2));
 }
 
 .loader-spinner-icon {

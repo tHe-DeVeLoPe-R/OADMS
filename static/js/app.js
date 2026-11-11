@@ -38,14 +38,21 @@ const PageLoader = {
             // If navigating within the same origin, trigger progress & optional overlay
             if (link.hostname === window.location.hostname) {
                 this.start();
-                // If it's a major navigation (e.g., voucher, add record, logout)
-                if (href.includes('/voucher/') || href.includes('/add_record') || href.includes('/login')) {
-                    this.showOverlay('Loading document...');
+                if (href.includes('/voucher/')) {
+                    this.showOverlay('Loading travel voucher & credentials...');
+                } else if (href.includes('/add_record')) {
+                    this.showOverlay('Opening record entry form...');
+                } else if (href.includes('/login') || href.includes('/logout')) {
+                    this.showOverlay('Processing authentication...');
+                } else if (href.includes('group=')) {
+                    this.showOverlay('Switching active group...');
+                } else {
+                    this.showOverlay('Loading requested page...');
                 }
             }
         });
 
-        // Intercept form submissions (e.g. creating pilgrim, add flight/hotel)
+        // Intercept form submissions (e.g. creating pilgrim, add flight/hotel, group selector)
         document.addEventListener('submit', (e) => {
             const form = e.target;
             const submitBtn = form.querySelector('button[type="submit"], input[type="submit"]');
@@ -58,7 +65,19 @@ const PageLoader = {
                 }
             }
             this.start();
-            this.showOverlay('Saving & Updating Records...');
+            if (form.id === 'groupSelectorForm') {
+                this.showOverlay('Switching active group...');
+            } else {
+                this.showOverlay('Saving & Updating Records...');
+            }
+        });
+
+        // Intercept select element changes that trigger a form submit or navigation
+        document.addEventListener('change', (e) => {
+            if (e.target.tagName === 'SELECT' && e.target.name === 'group') {
+                this.start();
+                this.showOverlay('Switching to group ' + e.target.value + '...');
+            }
         });
 
         // Handle browser back/forward cache (pageshow)

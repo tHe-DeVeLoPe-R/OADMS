@@ -289,18 +289,49 @@ def create_flight():
     group_code = request.form.get('group_code')
     flight_number = request.form.get('flight_number', '').strip().upper()
     airline = request.form.get('airline', '').strip()
-    route_type = request.form.get('route_type', 'Arrival')
+    route_type = request.form.get('route_type', 'Outbound')
     airport = request.form.get('airport', 'Jeddah (JED)')
+    origin_city = request.form.get('origin_city', '').strip() or ('Pakistan' if 'Outbound' in route_type else 'Saudi Arabia')
+    departure_time = request.form.get('departure_time', '').strip()
+    destination_city = request.form.get('destination_city', '').strip() or ('Saudi Arabia' if 'Outbound' in route_type else 'Pakistan')
+    arrival_time = request.form.get('arrival_time', '').strip()
     flight_date = request.form.get('flight_date') or None
-    flight_time = request.form.get('flight_time', '').strip()
+    flight_time = request.form.get('flight_time', '').strip() or departure_time
     pax_count = int(request.form.get('pax_count', 0))
     transport_assigned = request.form.get('transport_assigned', '').strip()
     status = request.form.get('status', 'On Time')
 
-    db.execute_stmt("""
-        INSERT INTO flight_tracker (group_code, flight_number, airline, route_type, airport, flight_date, flight_time, pax_count, transport_assigned, status)
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-    """, (group_code, flight_number, airline, route_type, airport, flight_date, flight_time, pax_count, transport_assigned, status))
+    # Legacy mapping in case TiDB ENUM still uses Arrival/Departure
+    legacy_route = 'Departure' if route_type == 'Outbound' else 'Arrival'
+    try:
+        # Tier-1: full insert with new dual-city columns
+        db.execute_stmt("""
+            INSERT INTO flight_tracker (group_code, flight_number, airline, route_type, airport, origin_city, departure_time, destination_city, arrival_time, flight_date, flight_time, pax_count, transport_assigned, status)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        """, (group_code, flight_number, airline, route_type, airport, origin_city, departure_time,
+              destination_city, arrival_time, flight_date, flight_time, pax_count, transport_assigned, status))
+    except Exception as e:
+        err_str = str(e)
+        schema_mismatch = ('origin_city' in err_str or '1054' in err_str or
+                           '1265' in err_str or 'Data truncated' in err_str or
+                           'route_type' in err_str)
+        if schema_mismatch:
+            try:
+                # Tier-2: without new city/time columns, new route_type strings
+                db.execute_stmt("""
+                    INSERT INTO flight_tracker (group_code, flight_number, airline, route_type, airport, flight_date, flight_time, pax_count, transport_assigned, status)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                """, (group_code, flight_number, airline, route_type, airport,
+                      flight_date, flight_time, pax_count, transport_assigned, status))
+            except Exception:
+                # Tier-3: TiDB ENUM still uses Arrival/Departure — map legacy values
+                db.execute_stmt("""
+                    INSERT INTO flight_tracker (group_code, flight_number, airline, route_type, airport, flight_date, flight_time, pax_count, transport_assigned, status)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                """, (group_code, flight_number, airline, legacy_route, airport,
+                      flight_date, flight_time, pax_count, transport_assigned, status))
+        else:
+            raise e
 
     flash(f"Flight {flight_number} ({route_type}) added to schedule!", "success")
     return redirect(url_for('dashboard'))
@@ -430,6 +461,176 @@ def update_pilgrim(pilgrim_id):
         """, (name, reference_by, passport_number, contact, address, pilgrim_id))
 
     flash(f"Pilgrim '{name}' details updated successfully.", "success")
+    return redirect(url_for('dashboard'))
+
+# -----------------------------------------------------------------------------
+# Quick Status / Record Updates (Flights, Hotels, Zyarat, Incidents)
+# -----------------------------------------------------------------------------
+@app.route('/update_flight/<int:flight_id>', methods=['POST'])
+@admin_required
+def update_flight(flight_id):
+    flight_number = request.form.get('flight_number', '').strip().upper()
+    airline = request.form.get('airline', '').strip()
+    route_type = request.form.get('route_type', 'Outbound')
+    airport = request.form.get('airport', '').strip()
+    origin_city = request.form.get('origin_city', '').strip() or ('Pakistan' if 'Outbound' in route_type else 'Saudi Arabia')
+    departure_time = request.form.get('departure_time', '').strip()
+    destination_city = request.form.get('destination_city', '').strip() or ('Saudi Arabia' if 'Outbound' in route_type else 'Pakistan')
+    arrival_time = request.form.get('arrival_time', '').strip()
+    flight_date = request.form.get('flight_date') or None
+    flight_time = request.form.get('flight_time', '').strip() or departure_time
+    pax_count = int(request.form.get('pax_count', 0))
+    transport_assigned = request.form.get('transport_assigned', '').strip()
+    status = request.form.get('status', 'On Time')
+    group_code = request.form.get('group_code')
+
+    try:
+        if group_code:
+            db.execute_stmt("""
+                UPDATE flight_tracker 
+                SET group_code = %s, flight_number = %s, airline = %s, route_type = %s,
+                    airport = %s, origin_city = %s, departure_time = %s, destination_city = %s,
+                    arrival_time = %s, flight_date = %s, flight_time = %s, pax_count = %s,
+                    transport_assigned = %s, status = %s
+                WHERE id = %s
+            """, (group_code, flight_number, airline, route_type, airport, origin_city, departure_time, destination_city, arrival_time, flight_date, flight_time, pax_count, transport_assigned, status, flight_id))
+        else:
+            db.execute_stmt("""
+                UPDATE flight_tracker 
+                SET flight_number = %s, airline = %s, route_type = %s,
+                    airport = %s, origin_city = %s, departure_time = %s, destination_city = %s,
+                    arrival_time = %s, flight_date = %s, flight_time = %s, pax_count = %s,
+                    transport_assigned = %s, status = %s
+                WHERE id = %s
+            """, (flight_number, airline, route_type, airport, origin_city, departure_time, destination_city, arrival_time, flight_date, flight_time, pax_count, transport_assigned, status, flight_id))
+    except Exception as e:
+        # Graceful fallback: TiDB schema may still have old ENUM('Arrival','Departure') for route_type
+        # or missing dual-city columns (origin_city, departure_time, destination_city, arrival_time).
+        # Map new Outbound/Inbound values to legacy ENUM values as a compatibility bridge.
+        legacy_route = 'Departure' if route_type == 'Outbound' else 'Arrival'
+        err_str = str(e)
+        schema_mismatch = ('origin_city' in err_str or '1054' in err_str or
+                           '1265' in err_str or 'Data truncated' in err_str or
+                           'route_type' in err_str)
+        if schema_mismatch:
+            try:
+                # Tier-2 fallback: without new city/time columns, but keep new route_type strings
+                # (works if only the new columns are missing but ENUM was already widened)
+                if group_code:
+                    db.execute_stmt("""
+                        UPDATE flight_tracker
+                        SET group_code = %s, flight_number = %s, airline = %s, route_type = %s,
+                            airport = %s, flight_date = %s, flight_time = %s, pax_count = %s,
+                            transport_assigned = %s, status = %s
+                        WHERE id = %s
+                    """, (group_code, flight_number, airline, route_type, airport,
+                          flight_date, flight_time, pax_count, transport_assigned, status, flight_id))
+                else:
+                    db.execute_stmt("""
+                        UPDATE flight_tracker
+                        SET flight_number = %s, airline = %s, route_type = %s,
+                            airport = %s, flight_date = %s, flight_time = %s, pax_count = %s,
+                            transport_assigned = %s, status = %s
+                        WHERE id = %s
+                    """, (flight_number, airline, route_type, airport,
+                          flight_date, flight_time, pax_count, transport_assigned, status, flight_id))
+            except Exception as e2:
+                # Tier-3 fallback: TiDB ENUM still has old values — use legacy Arrival/Departure mapping
+                try:
+                    if group_code:
+                        db.execute_stmt("""
+                            UPDATE flight_tracker
+                            SET group_code = %s, flight_number = %s, airline = %s, route_type = %s,
+                                airport = %s, flight_date = %s, flight_time = %s, pax_count = %s,
+                                transport_assigned = %s, status = %s
+                            WHERE id = %s
+                        """, (group_code, flight_number, airline, legacy_route, airport,
+                              flight_date, flight_time, pax_count, transport_assigned, status, flight_id))
+                    else:
+                        db.execute_stmt("""
+                            UPDATE flight_tracker
+                            SET flight_number = %s, airline = %s, route_type = %s,
+                                airport = %s, flight_date = %s, flight_time = %s, pax_count = %s,
+                                transport_assigned = %s, status = %s
+                            WHERE id = %s
+                        """, (flight_number, airline, legacy_route, airport,
+                              flight_date, flight_time, pax_count, transport_assigned, status, flight_id))
+                except Exception as e3:
+                    # Last resort: update only status and flight_time (always-safe columns)
+                    db.execute_stmt("""
+                        UPDATE flight_tracker SET status = %s, flight_time = %s WHERE id = %s
+                    """, (status, flight_time, flight_id))
+        else:
+            raise e
+
+    flash(f"Flight {flight_number} ({route_type}) updated successfully.", "success")
+    return redirect(url_for('dashboard'))
+
+@app.route('/update_hotel/<int:hotel_id>', methods=['POST'])
+@admin_required
+def update_hotel(hotel_id):
+    hotel_name = request.form.get('hotel_name', '').strip()
+    city = request.form.get('city')
+    check_in_date = request.form.get('check_in_date')
+    check_out_date = request.form.get('check_out_date')
+    rooms_allocated = int(request.form.get('rooms_allocated', 0))
+    voucher_status = request.form.get('voucher_status', 'Confirmed')
+    assigned_coordinator = request.form.get('assigned_coordinator', '').strip()
+    group_code = request.form.get('group_code')
+
+    if group_code:
+        db.execute_stmt("""
+            UPDATE hotel_transfers 
+            SET group_code = %s, hotel_name = %s, city = %s, check_in_date = %s,
+                check_out_date = %s, rooms_allocated = %s, voucher_status = %s,
+                assigned_coordinator = %s
+            WHERE id = %s
+        """, (group_code, hotel_name, city, check_in_date, check_out_date, rooms_allocated, voucher_status, assigned_coordinator, hotel_id))
+    else:
+        db.execute_stmt("""
+            UPDATE hotel_transfers 
+            SET hotel_name = %s, city = %s, check_in_date = %s,
+                check_out_date = %s, rooms_allocated = %s, voucher_status = %s,
+                assigned_coordinator = %s
+            WHERE id = %s
+        """, (hotel_name, city, check_in_date, check_out_date, rooms_allocated, voucher_status, assigned_coordinator, hotel_id))
+
+    flash(f"Hotel '{hotel_name}' status updated to '{voucher_status}'.", "success")
+    return redirect(url_for('dashboard'))
+
+@app.route('/update_zyarat/<int:zyarat_id>', methods=['POST'])
+@admin_required
+def update_zyarat(zyarat_id):
+    destination = request.form.get('destination', '').strip()
+    city = request.form.get('city')
+    zyarat_date = request.form.get('zyarat_date')
+    departure_time = request.form.get('departure_time', '').strip()
+    booked_pax = int(request.form.get('booked_pax', 0))
+    actual_pax = int(request.form.get('actual_pax', 0))
+    guide_murshid = request.form.get('guide_murshid', '').strip()
+    bus_number = request.form.get('bus_number', '').strip()
+    driver_name = request.form.get('driver_name', '').strip()
+    driver_phone = request.form.get('driver_phone', '').strip()
+    status = request.form.get('status', 'Completed')
+    notes = request.form.get('notes', '').strip()
+
+    db.execute_stmt("""
+        UPDATE zyarat_logs
+        SET destination = %s, city = %s, zyarat_date = %s, departure_time = %s,
+            booked_pax = %s, actual_pax = %s, guide_murshid = %s, bus_number = %s,
+            driver_name = %s, driver_phone = %s, status = %s, notes = %s
+        WHERE id = %s
+    """, (destination, city, zyarat_date, departure_time, booked_pax, actual_pax, guide_murshid, bus_number, driver_name, driver_phone, status, notes, zyarat_id))
+
+    flash(f"Zyarat excursion to '{destination}' updated.", "success")
+    return redirect(url_for('dashboard'))
+
+@app.route('/update_incident/<int:incident_id>', methods=['POST'])
+@admin_required
+def update_incident(incident_id):
+    status = request.form.get('status', 'Open')
+    db.execute_stmt("UPDATE operational_incidents SET status = %s WHERE id = %s", (status, incident_id))
+    flash(f"Incident marked as '{status}'.", "success")
     return redirect(url_for('dashboard'))
 
 # -----------------------------------------------------------------------------

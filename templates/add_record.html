@@ -117,21 +117,53 @@
 
                 <div class="clay-input-group">
                     <label class="clay-input-label">
-                        <i class="fa-solid fa-arrows-left-right" style="color: var(--primary);"></i> Route Movement *
+                        <i class="fa-solid fa-arrows-left-right" style="color: var(--primary);"></i> Route Category / Direction *
                     </label>
-                    <select name="route_type" class="clay-select" required>
-                        <option value="Arrival">Arrival (Airport Pickup to Hotel)</option>
-                        <option value="Departure">Departure (Hotel Dropoff to Airport)</option>
+                    <select name="route_type" class="clay-select" style="font-weight: 800; background: #f0fdf4;" required>
+                        <option value="Outbound" selected>🛫 Outbound (Pakistan ➔ Saudi Arabia) [Voucher Primary]</option>
+                        <option value="Inbound">🛬 Inbound (Saudi Arabia ➔ Pakistan) [Return Journey]</option>
                     </select>
                 </div>
 
                 <div class="clay-input-group">
                     <label class="clay-input-label">
-                        <i class="fa-solid fa-plane-up" style="color: var(--primary);"></i> Saudi Airport *
+                        <i class="fa-solid fa-plane-departure" style="color: var(--primary);"></i> Departure City / Origin *
+                    </label>
+                    <input type="text" name="origin_city" placeholder="e.g. Lahore (LHE) / Islamabad (ISB)" class="clay-input">
+                </div>
+
+                <div class="clay-input-group">
+                    <label class="clay-input-label">
+                        <i class="fa-regular fa-clock" style="color: var(--primary);"></i> Departure Time (from Origin) *
+                    </label>
+                    <input type="text" name="departure_time" required placeholder="e.g. 03:30 AM or 15:30" class="clay-input">
+                </div>
+
+                <div class="clay-input-group">
+                    <label class="clay-input-label">
+                        <i class="fa-solid fa-plane-arrival" style="color: #7e22ce;"></i> Arrival City / Destination *
+                    </label>
+                    <input type="text" name="destination_city" placeholder="e.g. Jeddah (JED) / Madinah (MED)" class="clay-input">
+                </div>
+
+                <div class="clay-input-group">
+                    <label class="clay-input-label">
+                        <i class="fa-regular fa-clock" style="color: #7e22ce;"></i> Arrival Time (at Destination) *
+                    </label>
+                    <input type="text" name="arrival_time" placeholder="e.g. 07:15 AM or 19:15" class="clay-input">
+                </div>
+
+                <div class="clay-input-group">
+                    <label class="clay-input-label">
+                        <i class="fa-solid fa-plane-up" style="color: var(--primary);"></i> Destination Airport *
                     </label>
                     <select name="airport" class="clay-select" required>
                         <option value="Jeddah (JED)">Jeddah King Abdulaziz Intl (JED)</option>
                         <option value="Madinah (MED)">Madinah Prince Mohammad Intl (MED)</option>
+                        <option value="Lahore (LHE)">Lahore Allama Iqbal Intl (LHE)</option>
+                        <option value="Islamabad (ISB)">Islamabad Intl (ISB)</option>
+                        <option value="Karachi (KHI)">Karachi Jinnah Intl (KHI)</option>
+                        <option value="Multan (MUX)">Multan Intl (MUX)</option>
                     </select>
                 </div>
 
@@ -140,13 +172,6 @@
                         <i class="fa-solid fa-calendar-day" style="color: var(--primary);"></i> Flight Date *
                     </label>
                     <input type="date" name="flight_date" required class="clay-input">
-                </div>
-
-                <div class="clay-input-group">
-                    <label class="clay-input-label">
-                        <i class="fa-solid fa-clock" style="color: var(--primary);"></i> Flight Time (Arrival/Departure) *
-                    </label>
-                    <input type="text" name="flight_time" required placeholder="e.g. 02:45 PM or 14:45" class="clay-input">
                 </div>
 
                 <div class="clay-input-group">
