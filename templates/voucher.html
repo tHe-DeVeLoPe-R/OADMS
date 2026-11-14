@@ -798,7 +798,8 @@
                 margin: 7mm 8mm 7mm 8mm;
             }
 
-            html, body {
+            html,
+            body {
                 background: #ffffff !important;
                 padding: 0 !important;
                 margin: 0 !important;
@@ -1026,8 +1027,7 @@
                         <!-- Official Logo Card -->
                         <div class="header-logo-card">
                             <img src="{{ url_for('static', filename='images/logoutw.png') }}"
-                                alt="Urwat il Wusqa Travels Official Logo"
-                                class="header-logo-img">
+                                alt="Urwat il Wusqa Travels Official Logo" class="header-logo-img">
                         </div>
                         <!-- Official Top-Corner Verification QR Code Card -->
                         <div class="header-qr-card">
@@ -1278,129 +1278,102 @@
                         </div>
 
                         <div class="flight-row">
-                            <span>Airport</span>
-                            <span>{{ f.airport }}</span>
-                        </div>
-                        <div class="flight-row">
                             <span>Flight Date</span>
                             <span>{{ f.flight_date or '—' }}</span>
                         </div>
-                        <div class="flight-row">
-                            <span>Passengers</span>
-                            <span>{{ f.pax_count }} Pax</span>
+                    </div>
+                    <!-- ===== FOOTER ===== -->
+                    <div class="voucher-footer">
+                        <div class="footer-text">
+                            <i class="fa-solid fa-calendar-day" style="color: var(--primary);"></i>
+                            Document generated on {{ now }}
+                            &bull; <span style="font-family: monospace; font-size: 0.72rem; color: #475569;"
+                                id="targetUrlText"></span>
                         </div>
-                        {% if f.transport_assigned %}
-                        <div class="flight-row">
-                            <span>Group Transport</span>
-                            <span>YES</span>
-                        </div>
-                        {% endif %}
-                        <div class="flight-row">
-                            <span>Flight Status</span>
-                            <span style="color: var(--primary); font-weight: 800;">{{ f.status }}</span>
+                        <div class="footer-seal" style="display: flex; align-items: center; gap: 0.5rem;">
+                            <img src="{{ url_for('static', filename='images/logoutw.png') }}" alt="Logo"
+                                style="height: 22px; width: auto; object-fit: contain;">
+                            <span>Urwat il Wusqa Travels &bull; Lic. 8488 &bull; Verified &amp; Authorized</span>
                         </div>
                     </div>
-                    {% endfor %}
-                </div>
-                {% else %}
-                <div class="empty-state">
-                    <i class="fa-solid fa-plane-slash"></i>
-                    <p>No flight details registered yet</p>
-                </div>
-                {% endif %}
-            </div>
 
-            <!-- ===== FOOTER ===== -->
-            <div class="voucher-footer">
-                <div class="footer-text">
-                    <i class="fa-solid fa-calendar-day" style="color: var(--primary);"></i>
-                    Document generated on {{ now }}
-                    &bull; <span style="font-family: monospace; font-size: 0.72rem; color: #475569;" id="targetUrlText"></span>
-                </div>
-                <div class="footer-seal" style="display: flex; align-items: center; gap: 0.5rem;">
-                    <img src="{{ url_for('static', filename='images/logoutw.png') }}" alt="Logo"
-                        style="height: 22px; width: auto; object-fit: contain;">
-                    <span>Urwat il Wusqa Travels &bull; Lic. 8488 &bull; Verified &amp; Authorized</span>
-                </div>
-            </div>
+                </div><!-- end voucher-doc -->
+            </div><!-- end voucher-wrap -->
 
-        </div><!-- end voucher-doc -->
-    </div><!-- end voucher-wrap -->
+            <script>
+                function generateGroupQRCode(targetUrl) {
+                    let activeUrl = targetUrl;
+                    if (!activeUrl) {
+                        const inputEl = document.getElementById('customQrUrlInput');
+                        activeUrl = (inputEl && inputEl.value.trim()) ? inputEl.value.trim() : window.location.href;
+                    }
 
-    <script>
-        function generateGroupQRCode(targetUrl) {
-            let activeUrl = targetUrl;
-            if (!activeUrl) {
-                const inputEl = document.getElementById('customQrUrlInput');
-                activeUrl = (inputEl && inputEl.value.trim()) ? inputEl.value.trim() : window.location.href;
-            }
+                    // Replace loopback 127.0.0.1 with phone-reachable default if available
+                    const defaultUrl = "{{ default_qr_url }}";
+                    if ((activeUrl.includes('127.0.0.1') || activeUrl.includes('localhost')) && defaultUrl && !defaultUrl.includes('127.0.0.1')) {
+                        activeUrl = defaultUrl;
+                        const inputEl = document.getElementById('customQrUrlInput');
+                        if (inputEl) inputEl.value = activeUrl;
+                    }
 
-            // Replace loopback 127.0.0.1 with phone-reachable default if available
-            const defaultUrl = "{{ default_qr_url }}";
-            if ((activeUrl.includes('127.0.0.1') || activeUrl.includes('localhost')) && defaultUrl && !defaultUrl.includes('127.0.0.1')) {
-                activeUrl = defaultUrl;
-                const inputEl = document.getElementById('customQrUrlInput');
-                if (inputEl) inputEl.value = activeUrl;
-            }
+                    const urlDisplay = document.getElementById('targetUrlText');
+                    if (urlDisplay) {
+                        urlDisplay.textContent = activeUrl;
+                    }
 
-            const urlDisplay = document.getElementById('targetUrlText');
-            if (urlDisplay) {
-                urlDisplay.textContent = activeUrl;
-            }
+                    const qrcodeBox = document.getElementById('qrcodeBox');
+                    if (!qrcodeBox) return;
+                    qrcodeBox.innerHTML = ''; // Clear previous
 
-            const qrcodeBox = document.getElementById('qrcodeBox');
-            if (!qrcodeBox) return;
-            qrcodeBox.innerHTML = ''; // Clear previous
+                    if (typeof QRCode !== 'undefined') {
+                        new QRCode(qrcodeBox, {
+                            text: activeUrl,
+                            width: 96,
+                            height: 96,
+                            colorDark: '#064e3b',
+                            colorLight: '#ffffff',
+                            correctLevel: QRCode.CorrectLevel.M
+                        });
+                    } else {
+                        // Fallback to QR server API image
+                        const img = document.createElement('img');
+                        img.src = 'https://api.qrserver.com/v1/create-qr-code/?size=96x96&color=064e3b&data=' + encodeURIComponent(activeUrl);
+                        img.alt = 'Group Verification QR Code';
+                        img.style.width = '96px';
+                        img.style.height = '96px';
+                        img.style.display = 'block';
+                        qrcodeBox.appendChild(img);
+                    }
 
-            if (typeof QRCode !== 'undefined') {
-                new QRCode(qrcodeBox, {
-                    text: activeUrl,
-                    width: 96,
-                    height: 96,
-                    colorDark: '#064e3b',
-                    colorLight: '#ffffff',
-                    correctLevel: QRCode.CorrectLevel.M
+                    // Update button text to give clear feedback
+                    const btn = document.getElementById('btnGenQR');
+                    if (btn) {
+                        btn.innerHTML = '<i class="fa-solid fa-circle-check" style="color: #34d399;"></i> QR Ready';
+                        btn.style.background = '#047857';
+                    }
+                }
+
+                // Progress Bar on Voucher page load
+                (function () {
+                    const bar = document.getElementById('voucherProgressBar');
+                    if (!bar) return;
+                    bar.style.opacity = '1';
+                    bar.style.width = '35%';
+                    setTimeout(() => { bar.style.width = '75%'; }, 100);
+                    window.addEventListener('load', () => {
+                        bar.style.width = '100%';
+                        setTimeout(() => {
+                            bar.style.opacity = '0';
+                            setTimeout(() => { bar.style.width = '0%'; }, 300);
+                        }, 200);
+                    });
+                })();
+
+                // Automatically generate QR code when page loads so it is ready right away for printing
+                document.addEventListener('DOMContentLoaded', () => {
+                    generateGroupQRCode();
                 });
-            } else {
-                // Fallback to QR server API image
-                const img = document.createElement('img');
-                img.src = 'https://api.qrserver.com/v1/create-qr-code/?size=96x96&color=064e3b&data=' + encodeURIComponent(activeUrl);
-                img.alt = 'Group Verification QR Code';
-                img.style.width = '96px';
-                img.style.height = '96px';
-                img.style.display = 'block';
-                qrcodeBox.appendChild(img);
-            }
-
-            // Update button text to give clear feedback
-            const btn = document.getElementById('btnGenQR');
-            if (btn) {
-                btn.innerHTML = '<i class="fa-solid fa-circle-check" style="color: #34d399;"></i> QR Ready';
-                btn.style.background = '#047857';
-            }
-        }
-
-        // Progress Bar on Voucher page load
-        (function () {
-            const bar = document.getElementById('voucherProgressBar');
-            if (!bar) return;
-            bar.style.opacity = '1';
-            bar.style.width = '35%';
-            setTimeout(() => { bar.style.width = '75%'; }, 100);
-            window.addEventListener('load', () => {
-                bar.style.width = '100%';
-                setTimeout(() => {
-                    bar.style.opacity = '0';
-                    setTimeout(() => { bar.style.width = '0%'; }, 300);
-                }, 200);
-            });
-        })();
-
-        // Automatically generate QR code when page loads so it is ready right away for printing
-        document.addEventListener('DOMContentLoaded', () => {
-            generateGroupQRCode();
-        });
-    </script>
+            </script>
 </body>
 
 </html>
