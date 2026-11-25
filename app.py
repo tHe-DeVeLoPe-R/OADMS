@@ -264,6 +264,32 @@ def update_permit_status(permit_id):
         flash(f"Permit status updated to {new_status}.", "success")
     return redirect(url_for('dashboard'))
 
+@app.route('/update_group/<int:group_id>', methods=['POST'])
+@admin_required
+def update_group(group_id):
+    group_name = request.form.get('group_name', '').strip()
+    total_pax = int(request.form.get('total_pax', 0))
+    leader_name = request.form.get('leader_name', '').strip()
+    leader_phone = request.form.get('leader_phone', '').strip()
+    arrival_date = request.form.get('arrival_date') or None
+    departure_date = request.form.get('departure_date') or None
+    status = request.form.get('status', 'Active')
+
+    db.execute_stmt("""
+        UPDATE pilgrim_groups
+        SET group_name = %s, total_pax = %s, leader_name = %s,
+            leader_phone = %s, arrival_date = %s, departure_date = %s, status = %s
+        WHERE id = %s
+    """, (group_name, total_pax, leader_name, leader_phone, arrival_date, departure_date, status, group_id))
+
+    # Also keep selected group in session updated if needed
+    group_obj = db.query_one("SELECT group_code FROM pilgrim_groups WHERE id = %s", (group_id,))
+    if group_obj:
+        session['selected_group'] = group_obj['group_code']
+
+    flash(f"Group details updated successfully.", "success")
+    return redirect(url_for('dashboard'))
+
 @app.route('/create_group', methods=['POST'])
 @admin_required
 def create_group():

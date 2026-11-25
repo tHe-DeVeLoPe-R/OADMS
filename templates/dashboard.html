@@ -46,6 +46,12 @@
         </div>
     </div>
     <div style="display: flex; align-items: center; gap: 0.65rem; flex-wrap: wrap;">
+        {% if selected_group %}
+        <button type="button" onclick="openModal('editGroupModal{{ selected_group.id }}')"
+           class="clay-btn clay-btn-sm" style="background: #ffffff; color: #047857; border: 1.5px solid #a7f3d0; font-size: 0.82rem; white-space: nowrap;">
+            <i class="fa-solid fa-pen-to-square"></i> Edit Group
+        </button>
+        {% endif %}
         {% if selected_group_code %}
         <a href="{{ url_for('group_voucher', group_code=selected_group_code) }}" target="_blank"
            class="clay-btn clay-btn-sm" style="background: #064e3b; color: #fff; font-size: 0.82rem; white-space: nowrap;">
@@ -1190,6 +1196,86 @@
     </div>
 
 </div>
+
+<!-- Edit Group Details Modal -->
+{% if selected_group %}
+<div class="clay-modal-overlay" id="editGroupModal{{ selected_group.id }}">
+    <div class="clay-modal" style="max-width: 580px;">
+        <div class="modal-header">
+            <div style="display: flex; align-items: center; gap: 0.65rem;">
+                <div class="clay-icon-bubble emerald" style="width: 36px; height: 36px; font-size: 1.1rem;">
+                    <i class="fa-solid fa-layer-group"></i>
+                </div>
+                <h3 style="font-size: 1.15rem; font-weight: 800; color: #064e3b;">
+                    Edit Group Details ({{ selected_group.group_code }})
+                </h3>
+            </div>
+            <button type="button" onclick="closeModal('editGroupModal{{ selected_group.id }}')" class="modal-close-btn">&times;</button>
+        </div>
+
+        <form method="POST" action="{{ url_for('update_group', group_id=selected_group.id) }}" onsubmit="if(window.PageLoader){ PageLoader.start(); PageLoader.showOverlay('Updating group details...'); }">
+            <div style="margin-bottom: 1.25rem;">
+                <div class="clay-input-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.85rem; margin-bottom: 0.85rem;">
+                    <div class="clay-input-group">
+                        <label class="clay-input-label">Group Code</label>
+                        <input type="text" value="{{ selected_group.group_code }}" disabled class="clay-input" style="background: #f1f5f9; cursor: not-allowed; opacity: 0.85;">
+                    </div>
+                    <div class="clay-input-group">
+                        <label class="clay-input-label">Package / Group Name *</label>
+                        <input type="text" name="group_name" value="{{ selected_group.group_name }}" required class="clay-input">
+                    </div>
+                </div>
+
+                <div class="clay-input-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.85rem; margin-bottom: 0.85rem;">
+                    <div class="clay-input-group">
+                        <label class="clay-input-label">Total Pilgrims (Pax) *</label>
+                        <input type="number" name="total_pax" value="{{ selected_group.total_pax }}" min="0" required class="clay-input">
+                    </div>
+                    <div class="clay-input-group">
+                        <label class="clay-input-label">Group Status</label>
+                        <select name="status" class="clay-select">
+                            <option value="Active" {% if selected_group.status == 'Active' %}selected{% endif %}>Active</option>
+                            <option value="Completed" {% if selected_group.status == 'Completed' %}selected{% endif %}>Completed</option>
+                            <option value="Archived" {% if selected_group.status == 'Archived' %}selected{% endif %}>Archived</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="clay-input-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.85rem; margin-bottom: 0.85rem;">
+                    <div class="clay-input-group">
+                        <label class="clay-input-label">Group Leader / Coordinator</label>
+                        <input type="text" name="leader_name" value="{{ selected_group.leader_name or '' }}" placeholder="e.g. Haji Zafar Iqbal" class="clay-input">
+                    </div>
+                    <div class="clay-input-group">
+                        <label class="clay-input-label">Leader WhatsApp / Phone</label>
+                        <input type="text" name="leader_phone" value="{{ selected_group.leader_phone or '' }}" placeholder="+92 300 1234567" class="clay-input">
+                    </div>
+                </div>
+
+                <div class="clay-input-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.85rem;">
+                    <div class="clay-input-group">
+                        <label class="clay-input-label">Arrival Date (KSA)</label>
+                        <input type="date" name="arrival_date" value="{{ selected_group.arrival_date or '' }}" class="clay-input">
+                    </div>
+                    <div class="clay-input-group">
+                        <label class="clay-input-label">Departure / Return Date</label>
+                        <input type="date" name="departure_date" value="{{ selected_group.departure_date or '' }}" class="clay-input">
+                    </div>
+                </div>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border); padding-top: 1rem;">
+                <button type="button" onclick="closeModal('editGroupModal{{ selected_group.id }}')" class="clay-btn clay-btn-secondary clay-btn-sm">
+                    Cancel
+                </button>
+                <button type="submit" class="clay-btn clay-btn-primary clay-btn-sm">
+                    <i class="fa-solid fa-check"></i> Save Group Details
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endif %}
 
 {% endblock %}
 
