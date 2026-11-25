@@ -464,14 +464,23 @@
         .hotel-row {
             display: flex;
             justify-content: space-between;
+            align-items: flex-start;
+            gap: 12px;
             font-size: 0.78rem;
             padding: 3px 0;
             color: var(--text-muted);
         }
 
+        .hotel-row span:first-child {
+            flex-shrink: 0;
+            white-space: nowrap;
+        }
+
         .hotel-row span:last-child {
             font-weight: 700;
             color: var(--text-dark);
+            text-align: right;
+            word-break: break-word;
         }
 
         .voucher-status {
@@ -1178,10 +1187,6 @@
                         <div class="hotel-row">
                             <span>Check-Out</span>
                             <span>{{ h.check_out_date }}</span>
-                        </div>
-                        <div class="hotel-row">
-                            <span>Rooms</span>
-                            <span>{{ h.rooms_allocated }} Rooms</span>
                         </div>
                         {% if h.assigned_coordinator %}
                         <div class="hotel-row">
