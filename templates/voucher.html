@@ -897,7 +897,8 @@
 
             .voucher-header .verified-badge,
             .voucher-header .header-group-info {
-                display: none !important; /* Kept on screen, hidden on print as requested */
+                display: none !important;
+                /* Kept on screen, hidden on print as requested */
             }
 
             .header-top-row {
@@ -1003,7 +1004,7 @@
                 margin-left: 0.4rem !important;
             }
 
-            .section-heading > div {
+            .section-heading>div {
                 display: flex !important;
                 align-items: baseline !important;
             }
@@ -1209,10 +1210,12 @@
             <!-- Compact Print Summary Strip (Only prints, hidden on screen) -->
             <div class="print-group-strip print-only">
                 <div>
-                    <strong>Group:</strong> {{ group.group_code }} &mdash; {{ group.group_name }} ({{ group.total_pax }} Pax)
+                    <strong>Group:</strong> {{ group.group_code }} &mdash; {{ group.group_name }} ({{ group.total_pax }}
+                    Pax)
                 </div>
                 <div>
-                    {% if group.leader_name %}<strong>Leader:</strong> {{ group.leader_name }}{% if group.leader_phone %} ({{ group.leader_phone }}){% endif %} &bull; {% endif %}
+                    {% if group.leader_name %}<strong>Coordinator:</strong> {{ group.leader_name }}{% if
+                    group.leader_phone %} ({{ group.leader_phone }}){% endif %} &bull; {% endif %}
                     {% if group.arrival_date %}<strong>KSA:</strong> {{ group.arrival_date }} &bull; {% endif %}
                     {% if group.departure_date %}<strong>Return:</strong> {{ group.departure_date }}{% endif %}
                 </div>
@@ -1301,7 +1304,8 @@
                         </div>
                         <div class="hotel-row">
                             <span>City</span>
-                            <span>{% if 'makkah' in (h.city|lower) %}Makkah Pak{% elif 'madin' in (h.city|lower) %}Madina Pak{% else %}{{ h.city }}{% endif %}</span>
+                            <span>{% if 'makkah' in (h.city|lower) %}Makkah Pak{% elif 'madin' in (h.city|lower)
+                                %}Madina Pak{% else %}{{ h.city }}{% endif %}</span>
                         </div>
                         <div class="hotel-row">
                             <span>Check-In</span>
@@ -1348,11 +1352,13 @@
                             <tr>
                                 <td style="font-weight: 800; color: #64748b;">{{ loop.index }}</td>
                                 <td style="font-weight: 800; color: #064e3b;">{{ h.hotel_name }}</td>
-                                <td>{% if 'makkah' in (h.city|lower) %}Makkah Pak{% elif 'madin' in (h.city|lower) %}Madina Pak{% else %}{{ h.city }}{% endif %}</td>
+                                <td>{% if 'makkah' in (h.city|lower) %}Makkah Pak{% elif 'madin' in (h.city|lower)
+                                    %}Madina Pak{% else %}{{ h.city }}{% endif %}</td>
                                 <td>{{ h.check_in_date }}</td>
                                 <td>{{ h.check_out_date }}</td>
                                 <td>{{ h.assigned_coordinator or '—' }}</td>
-                                <td style="text-align: center; font-weight: 700; color: #047857;">{{ h.voucher_status }}</td>
+                                <td style="text-align: center; font-weight: 700; color: #047857;">{{ h.voucher_status }}
+                                </td>
                             </tr>
                             {% endfor %}
                         </tbody>
@@ -1467,13 +1473,16 @@
                                 <td>{{ f.airline or 'Commercial Airline' }}</td>
                                 <td>
                                     {% if f.route_type == 'Outbound' or f.route_type == 'Departure' %}
-                                    <span style="font-weight: 700; color: #047857;">Outbound:</span> {{ f.origin_city or 'Pakistan' }} ➔ {{ f.destination_city or 'Saudi Arabia' }}
+                                    <span style="font-weight: 700; color: #047857;">Outbound:</span> {{ f.origin_city or
+                                    'Pakistan' }} ➔ {{ f.destination_city or 'Saudi Arabia' }}
                                     {% else %}
-                                    <span style="font-weight: 700; color: #7c3aed;">Inbound:</span> {{ f.origin_city or 'Saudi Arabia' }} ➔ {{ f.destination_city or 'Pakistan' }}
+                                    <span style="font-weight: 700; color: #7c3aed;">Inbound:</span> {{ f.origin_city or
+                                    'Saudi Arabia' }} ➔ {{ f.destination_city or 'Pakistan' }}
                                     {% endif %}
                                 </td>
                                 <td>{{ f.flight_date or '—' }}</td>
-                                <td style="font-weight: 700; color: #047857;">{{ f.departure_time or f.flight_time or 'TBD' }}</td>
+                                <td style="font-weight: 700; color: #047857;">{{ f.departure_time or f.flight_time or
+                                    'TBD' }}</td>
                                 <td style="font-weight: 700; color: #7c3aed;">{{ f.arrival_time or 'TBD' }}</td>
                                 <td style="text-align: center; font-weight: 700;">{{ f.status }}</td>
                             </tr>
