@@ -800,11 +800,20 @@
             opacity: 0;
         }
 
-        /* ---- PRINT STYLES (Single Page / Compact Optimization) ---- */
+        /* ---- PRINT-ONLY & SCREEN-ONLY HELPERS ---- */
+        .print-only {
+            display: none !important;
+        }
+
+        .screen-only {
+            display: block;
+        }
+
+        /* ---- PRINT STYLES (Ultra-Compact Single Page Optimization) ---- */
         @media print {
             @page {
                 size: A4 portrait;
-                margin: 7mm 8mm 7mm 8mm;
+                margin: 6mm 8mm 6mm 8mm;
             }
 
             html,
@@ -812,10 +821,26 @@
                 background: #ffffff !important;
                 padding: 0 !important;
                 margin: 0 !important;
-                font-size: 11.5px;
+                font-size: 11px !important;
                 color: #0f172a !important;
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
+            }
+
+            .screen-only {
+                display: none !important;
+            }
+
+            .print-only {
+                display: block !important;
+            }
+
+            table.print-only {
+                display: table !important;
+            }
+
+            tr.print-only {
+                display: table-row !important;
             }
 
             .no-print,
@@ -833,145 +858,230 @@
             .voucher-doc {
                 box-shadow: none !important;
                 border-radius: 0 !important;
-                border: 1px solid #cbd5e1 !important;
+                border: 1px solid #94a3b8 !important;
                 overflow: visible !important;
             }
 
+            /* Ultra-Compact Print Header: Only Name, License, Heading, Logo & QR */
             .voucher-header {
-                padding: 1.1rem 1.5rem 0.95rem !important;
+                padding: 0.6rem 1rem !important;
                 page-break-inside: avoid !important;
                 background: #064e3b !important;
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
             }
 
-            .header-top-line {
-                font-size: 0.62rem !important;
+            .voucher-header .header-top-line {
+                font-size: 0.65rem !important;
+                letter-spacing: 0.08em !important;
+                margin-bottom: 0.15rem !important;
+                color: #d1fae5 !important;
+                font-weight: 800 !important;
+            }
+
+            .voucher-header .company-name {
+                font-size: 1.45rem !important;
+                line-height: 1.1 !important;
                 margin-bottom: 0.2rem !important;
             }
 
-            .company-name {
-                font-size: 1.55rem !important;
-                margin-bottom: 0.15rem !important;
-            }
-
-            .company-lic {
-                font-size: 0.74rem !important;
-                margin-bottom: 0.65rem !important;
-            }
-
-            .verified-badge {
-                margin-bottom: 0.65rem !important;
-                padding: 0.3rem 0.7rem !important;
+            .voucher-header .company-lic {
                 font-size: 0.72rem !important;
+                margin-bottom: 0 !important;
             }
 
-            .header-group-info {
-                gap: 0.5rem 0.85rem !important;
-                margin-top: 0.35rem !important;
+            .voucher-header .company-lic span {
+                padding: 1px 8px !important;
+                font-size: 0.75rem !important;
             }
 
-            .hgi-item label {
-                font-size: 0.58rem !important;
-                margin-bottom: 1px !important;
+            .voucher-header .verified-badge,
+            .voucher-header .header-group-info {
+                display: none !important; /* Kept on screen, hidden on print as requested */
             }
 
-            .hgi-item .hgi-val {
-                font-size: 0.82rem !important;
+            .header-top-row {
+                display: flex !important;
+                flex-direction: row !important;
+                align-items: center !important;
+                justify-content: space-between !important;
+                gap: 0.75rem !important;
+                flex-wrap: nowrap !important;
+            }
+
+            .header-titles {
+                flex: 1 !important;
+            }
+
+            .header-right-meta {
+                display: flex !important;
+                flex-direction: row !important;
+                align-items: center !important;
+                gap: 0.5rem !important;
+                flex-shrink: 0 !important;
             }
 
             .header-logo-card {
                 box-shadow: none !important;
                 border: 1.5px solid #cbd5e1 !important;
-                padding: 5px 8px !important;
-                min-width: 90px !important;
+                padding: 3px 6px !important;
+                min-width: auto !important;
+                border-radius: 8px !important;
             }
 
             .header-logo-img {
-                height: 50px !important;
+                height: 48px !important;
+                max-width: 90px !important;
             }
 
             .header-qr-card {
                 box-shadow: none !important;
                 border: 1.5px solid #cbd5e1 !important;
-                padding: 4px 6px 5px !important;
-                min-width: 92px !important;
+                padding: 3px 5px !important;
+                min-width: auto !important;
+                border-radius: 8px !important;
             }
 
             .header-qr-box,
             .header-qr-box img,
             .header-qr-box canvas {
-                width: 80px !important;
-                height: 80px !important;
+                width: 58px !important;
+                height: 58px !important;
             }
 
             .header-qr-tag {
-                font-size: 0.58rem !important;
-                margin-top: 2px !important;
+                font-size: 0.52rem !important;
+                margin-top: 1px !important;
+                font-weight: 800 !important;
             }
 
             .header-qr-sub {
-                font-size: 0.54rem !important;
+                display: none !important;
             }
 
+            /* Compact Summary Strip on Print right under header */
+            .print-group-strip {
+                display: flex !important;
+                justify-content: space-between !important;
+                align-items: center !important;
+                background: #f1f5f9 !important;
+                border-bottom: 1.5px solid #cbd5e1 !important;
+                padding: 0.35rem 1rem !important;
+                font-size: 0.74rem !important;
+                font-weight: 700 !important;
+                color: #064e3b !important;
+            }
+
+            /* Compact Document Sections */
             .doc-section {
-                padding: 0.75rem 1.5rem !important;
+                padding: 0.45rem 1rem !important;
+                border-bottom: 1px solid #e2e8f0 !important;
                 page-break-inside: auto !important;
             }
 
             .section-heading {
-                margin-bottom: 0.45rem !important;
+                margin-bottom: 0.3rem !important;
+                gap: 0.45rem !important;
             }
 
             .section-icon {
-                width: 28px !important;
-                height: 28px !important;
-                font-size: 0.75rem !important;
+                width: 22px !important;
+                height: 22px !important;
+                font-size: 0.7rem !important;
+                border-radius: 6px !important;
             }
 
             .section-title {
-                font-size: 0.92rem !important;
+                font-size: 0.86rem !important;
+                font-weight: 800 !important;
+                color: #064e3b !important;
             }
 
             .section-sub {
-                font-size: 0.68rem !important;
+                font-size: 0.65rem !important;
+                display: inline-block !important;
+                margin-left: 0.4rem !important;
             }
 
+            .section-heading > div {
+                display: flex !important;
+                align-items: baseline !important;
+            }
+
+            /* Tables in Print (Manifest, Hotels, Flights) */
             .pil-table-wrapper {
-                border: none !important;
+                border: 1px solid #cbd5e1 !important;
+                border-radius: 6px !important;
                 overflow: visible !important;
             }
 
-            .pil-table {
+            .pil-table,
+            .print-table {
+                width: 100% !important;
                 min-width: 100% !important;
+                border-collapse: collapse !important;
+                margin: 0 !important;
             }
 
             .pil-table th,
-            .pil-table td {
-                padding: 3.5px 6px !important;
-                font-size: 0.74rem !important;
+            .pil-table td,
+            .print-table th,
+            .print-table td {
+                padding: 2.5px 5px !important;
+                font-size: 0.72rem !important;
+                line-height: 1.25 !important;
+                border-bottom: 1px solid #cbd5e1 !important;
             }
 
-            .pil-table tr {
+            .pil-table th,
+            .print-table th {
+                background: #f8fafc !important;
+                font-size: 0.66rem !important;
+                font-weight: 800 !important;
+                text-transform: uppercase !important;
+                letter-spacing: 0.04em !important;
+                color: #065f46 !important;
+                border-bottom: 1.5px solid #a7f3d0 !important;
+                padding-top: 3px !important;
+                padding-bottom: 3px !important;
+            }
+
+            .pil-table tr,
+            .print-table tr {
                 page-break-inside: avoid !important;
             }
 
-            .hotel-grid,
-            .flight-grid {
-                gap: 0.5rem !important;
+            .passport-mono {
+                font-size: 0.72rem !important;
+                padding: 1px 4px !important;
+                background: transparent !important;
+                border: none !important;
             }
 
-            .hotel-card,
-            .flight-card {
-                padding: 0.6rem 0.85rem !important;
-                page-break-inside: avoid !important;
-                border: 1px solid #cbd5e1 !important;
-                box-shadow: none !important;
+            .purpose-badge {
+                padding: 1px 6px !important;
+                font-size: 0.65rem !important;
             }
 
+            .route-badge {
+                padding: 1px 5px !important;
+                font-size: 0.64rem !important;
+            }
+
+            /* Compact Footer */
             .voucher-footer {
-                padding: 0.6rem 1.5rem !important;
+                padding: 0.35rem 1rem !important;
+                font-size: 0.68rem !important;
                 page-break-inside: avoid !important;
+                border-top: 1px solid #cbd5e1 !important;
+            }
+
+            .footer-seal span {
+                font-size: 0.68rem !important;
+            }
+
+            .footer-seal img {
+                height: 16px !important;
             }
         }
     </style>
@@ -1096,6 +1206,18 @@
                 </div>
             </div>
 
+            <!-- Compact Print Summary Strip (Only prints, hidden on screen) -->
+            <div class="print-group-strip print-only">
+                <div>
+                    <strong>Group:</strong> {{ group.group_code }} &mdash; {{ group.group_name }} ({{ group.total_pax }} Pax)
+                </div>
+                <div>
+                    {% if group.leader_name %}<strong>Leader:</strong> {{ group.leader_name }}{% if group.leader_phone %} ({{ group.leader_phone }}){% endif %} &bull; {% endif %}
+                    {% if group.arrival_date %}<strong>KSA:</strong> {{ group.arrival_date }} &bull; {% endif %}
+                    {% if group.departure_date %}<strong>Return:</strong> {{ group.departure_date }}{% endif %}
+                </div>
+            </div>
+
             <!-- ===== SECTION 1: PILGRIMS MANIFEST (ONLY: NAME, PASSPORT, PURPOSE) ===== -->
             <div class="doc-section">
                 <div class="section-heading">
@@ -1169,7 +1291,8 @@
                 </div>
 
                 {% if hotels %}
-                <div class="hotel-grid">
+                <!-- Screen Layout: Grid Cards (Unchanged on Live View) -->
+                <div class="hotel-grid screen-only">
                     {% for h in hotels %}
                     <div class="hotel-card">
                         <div class="hotel-card-name">
@@ -1178,7 +1301,7 @@
                         </div>
                         <div class="hotel-row">
                             <span>City</span>
-                            <span>{{ h.city }}</span>
+                            <span>{% if 'makkah' in (h.city|lower) %}Makkah Pak{% elif 'madin' in (h.city|lower) %}Madina Pak{% else %}{{ h.city }}{% endif %}</span>
                         </div>
                         <div class="hotel-row">
                             <span>Check-In</span>
@@ -1205,6 +1328,36 @@
                     </div>
                     {% endfor %}
                 </div>
+
+                <!-- Print Layout: Ultra-Compact Table Form (Takes minimal space for 1-page fit) -->
+                <div class="pil-table-wrapper print-only">
+                    <table class="print-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 28px;">#</th>
+                                <th>Hotel Name</th>
+                                <th>City</th>
+                                <th>Check-In</th>
+                                <th>Check-Out</th>
+                                <th>Coordinator</th>
+                                <th style="text-align: center;">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for h in hotels %}
+                            <tr>
+                                <td style="font-weight: 800; color: #64748b;">{{ loop.index }}</td>
+                                <td style="font-weight: 800; color: #064e3b;">{{ h.hotel_name }}</td>
+                                <td>{% if 'makkah' in (h.city|lower) %}Makkah Pak{% elif 'madin' in (h.city|lower) %}Madina Pak{% else %}{{ h.city }}{% endif %}</td>
+                                <td>{{ h.check_in_date }}</td>
+                                <td>{{ h.check_out_date }}</td>
+                                <td>{{ h.assigned_coordinator or '—' }}</td>
+                                <td style="text-align: center; font-weight: 700; color: #047857;">{{ h.voucher_status }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
                 {% else %}
                 <div class="empty-state">
                     <i class="fa-solid fa-hotel"></i>
@@ -1227,7 +1380,8 @@
                 </div>
 
                 {% if flights %}
-                <div class="flight-grid">
+                <!-- Screen Layout: Grid Cards (Unchanged on Live View) -->
+                <div class="flight-grid screen-only">
                     {% for f in flights %}
                     <div class="flight-card"
                         style="border-left: 5px solid {% if f.route_type == 'Outbound' or f.route_type == 'Departure' %}#059669{% else %}#7c3aed{% endif %};">
@@ -1288,6 +1442,44 @@
                         </div>
                     </div>
                     {% endfor %}
+                </div>
+
+                <!-- Print Layout: Ultra-Compact Table Form (Takes minimal space for 1-page fit) -->
+                <div class="pil-table-wrapper print-only">
+                    <table class="print-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 28px;">#</th>
+                                <th>Flight No.</th>
+                                <th>Airline</th>
+                                <th>Route / Direction</th>
+                                <th>Flight Date</th>
+                                <th>Departure Time</th>
+                                <th>Landing / Arrival Time</th>
+                                <th style="text-align: center;">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for f in flights %}
+                            <tr>
+                                <td style="font-weight: 800; color: #64748b;">{{ loop.index }}</td>
+                                <td style="font-weight: 800; color: #064e3b;">{{ f.flight_number }}</td>
+                                <td>{{ f.airline or 'Commercial Airline' }}</td>
+                                <td>
+                                    {% if f.route_type == 'Outbound' or f.route_type == 'Departure' %}
+                                    <span style="font-weight: 700; color: #047857;">Outbound:</span> {{ f.origin_city or 'Pakistan' }} ➔ {{ f.destination_city or 'Saudi Arabia' }}
+                                    {% else %}
+                                    <span style="font-weight: 700; color: #7c3aed;">Inbound:</span> {{ f.origin_city or 'Saudi Arabia' }} ➔ {{ f.destination_city or 'Pakistan' }}
+                                    {% endif %}
+                                </td>
+                                <td>{{ f.flight_date or '—' }}</td>
+                                <td style="font-weight: 700; color: #047857;">{{ f.departure_time or f.flight_time or 'TBD' }}</td>
+                                <td style="font-weight: 700; color: #7c3aed;">{{ f.arrival_time or 'TBD' }}</td>
+                                <td style="text-align: center; font-weight: 700;">{{ f.status }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
                 </div>
                 {% else %}
                 <div class="empty-state">
